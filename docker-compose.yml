@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:13
+    # build: ./dockerfiles/postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      # для указания места хранения данных в контейнере default:/var/lib/postgresql/data
+      PGDATA: /var/lib/postgresql/data/pgdata
+    # volumes:
+      # РАСКОМЕНТИРОВАТЬ
+      # если появиться возможность хранить данные в проекте
+      # - ./pgdata:/var/lib/postgresql/data/pgdata
+      # для конфигурации в проекте
+      # - ./pgconf:/etc/postgresql
+      # для логирования в проекте
+      # - ./log/pglog:/var/log/postgresql
+    volumes:
+      - ./postgresql/sql:/home/sql
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    # restart: unless-stopped
+  
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    # раскоментировать если нужны файлы pgadmin
+    # volumes:
+    #    - ./pgadmin:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - backend
+    # restart: unless-stopped
+
+  web:
+    container_name: web_container
+    # image: php:8.0-apache
+    build: ./dockerfiles/php
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./src:/var/www/html
+      - ./log/apache2:/var/log/apache2
+    networks:
+      - backend
+    # restart: unless-stopped
+
+networks:
+  backend:
+    driver: bridge
+
+# TEST TMP
+# volumes:
+#   pgdata:
+#     driver: local

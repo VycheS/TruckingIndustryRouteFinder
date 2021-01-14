@@ -1,0 +1,12 @@
+#folder logs apache and php
+log/
+
+#temporary files
+tmp/
+src/tmp/
+
+#bin data
+postgresql/pgdata
+
+#not used in the project
+not_used/
