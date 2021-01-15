@@ -1,60 +1,72 @@
 -- СОЗДАЁМ ТАБЛИЦЫ
 -- пользователь(user)
-CREATE TABLE client(
+CREATE TABLE user(
     id serial PRIMARY KEY,
-    surname varchar(25),
-    name varchar(25),
-    patronymic varchar(25),
-    email varchar(50),
-    password varchar,
-    numberphone varchar(25),
-    role varchar(25),
+    surname varchar(25) NOT NULL,
+    name varchar(25) NOT NULL,
+    patronymic varchar(25) NOT NULL,
+    email varchar(50) NOT NULL,
+    password varchar NOT NULL,
+    numberphone varchar(25) NOT NULL,
+    role varchar(25) NOT NULL,
     addjson jsonb
 );
-
-CREATE TABLE layergroup(
+-- группы слоёв
+CREATE TABLE layer_group(
     id serial PRIMARY KEY,
-    name varchar(25)
+    name varchar(25) NOT NULL
 );
-
-CREATE TABLE client_layergroup(
-    client_id integer REFERENCES client(id),
-    layergroup_id integer REFERENCES layergroup(id)
+-- ассоциативная таблица для создания многие ко многим между layer_group и user
+CREATE TABLE user_layer_group(
+    user_id integer REFERENCES user(id),
+    layer_group_id integer REFERENCES layer_group(id)
 );
--- //TODO здесь доделать создание базы
-
--- ЗДЕСЬ ДЛЯ ПРИМЕРА В ПОСЛЕДУЮЩЕМ БУДЕТ УДАЛЕНО
--- покупатели
-CREATE TABLE customer(
+-- слой
+CREATE TABLE layer(
     id serial PRIMARY KEY,
-    name varchar(255),
-    phone varchar(30),
-    email varchar(255)
+    layer_group_id integer REFERENCES layer_group(id),
+    name varchar(25) NOT NULL,
+    description text NOT NULL,
+    addjson jsonb
 );
-
--- продукты
-CREATE TABLE product(
+-- //TODO !!!!!!!!СДЕЛАТЬ ЧТОБЫ НАСЛЕДОВАЛСЯ ОТ layer либо point_layer либо line_layer
+-- слой точка, наследованный от таблицы слой
+CREATE TABLE point_layer(
+    id integer REFERENCES layer(id) PRIMARY KEY
+);
+-- слой линия, наследованный от таблицы слой
+CREATE TABLE line_layer(
+    id integer REFERENCES layer(id) PRIMARY KEY
+);
+-- точка
+CREATE TABLE point(
     id serial PRIMARY KEY,
-    name varchar(255),
-    description text,
-    price integer
+    point_layer_id integer REFERENCES point_layer(id),
+    name varchar(25) NOT NULL,
+    description text NOT NULL,
+    addjson jsonb
 );
-
--- фото продуктов
-CREATE TABLE product_photo(
+-- линия
+CREATE TABLE line(
     id serial PRIMARY KEY,
-    url varchar(255),
-    product_id integer REFERENCES product(id)
+    line_layer_id integer REFERENCES line_layer(id),
+    name varchar(25) NOT NULL,
+    description text NOT NULL,
+    addjson jsonb
 );
-
--- корзина
-CREATE TABLE cart(
-    customer_id integer REFERENCES customer(id),
+-- пользовательский тип координата(coord)
+CREATE TYPE coord AS(
+    -- //TODO сделать проверку чтобы были заполнены оба поля
+    -- широта
+    latitude double precision,
+    -- долгота
+    longitude double precision
+);
+-- сущность координата
+CREATE TABLE coordinate(
     id serial PRIMARY KEY
-);
-
--- связь корзина-продукты
-CREATE TABLE cart_product(
-    cart_id integer REFERENCES cart(id),
-    product_id integer REFERENCES product(id)
+    -- //TODO сделать возможность чтобы существовал только один внешний ключ либо point либо line
+    point_id integer REFERENCES point(id),
+    line_id intger REFERENCES line(id),
+    coordinate coord[] NOT NULL -- //TODO сделать проверку для point что можно было ложить только один элемент
 );
