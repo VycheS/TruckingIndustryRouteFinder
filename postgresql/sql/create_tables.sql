@@ -29,7 +29,7 @@ CREATE TABLE layer(
     description text NOT NULL,
     addjson jsonb
 );
--- //TODO !!!!!!!!СДЕЛАТЬ ЧТОБЫ НАСЛЕДОВАЛСЯ ОТ layer либо point_layer либо line_layer
+-- //TODO !!!!!!!!СДЕЛАТЬ чтобы наследовался только от layer либо point_layer либо line_layer но не одновременно
 -- слой точка, наследованный от таблицы слой
 CREATE TABLE point_layer(
     id integer REFERENCES layer(id) PRIMARY KEY
