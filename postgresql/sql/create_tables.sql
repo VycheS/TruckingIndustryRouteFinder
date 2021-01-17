@@ -69,8 +69,9 @@ CREATE TYPE coord AS(
 -- сущность координата
 CREATE TABLE coordinate(
     id serial PRIMARY KEY
-    -- //TODO сделать возможность чтобы существовал только один внешний ключ либо point либо line
     point_id integer REFERENCES point(id),
-    line_id intger REFERENCES line(id),
+    line_id integer REFERENCES line(id),
     coordinate coord[] NOT NULL -- //TODO сделать проверку для point что можно было ложить только один элемент
+    -- Проверка чтобы существовал только один внешний ключ point либо line
+    CHECK(((point_id != NULL) AND (line_id = NULL)) OR ((point_id = NULL) AND (line_id != NULL)))
 );
