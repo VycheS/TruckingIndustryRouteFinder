@@ -73,5 +73,6 @@ CREATE TABLE coordinate(
     line_id integer REFERENCES line(id),
     coordinate coord[] NOT NULL -- //TODO сделать проверку для point что можно было ложить только один элемент
     -- Проверка чтобы существовал только один внешний ключ point либо line
-    CHECK(((point_id != NULL) AND (line_id = NULL)) OR ((point_id = NULL) AND (line_id != NULL)))
+    CHECK(((point_id IS NOT NULL) AND (line_id IS NULL)) OR ((point_id IS NULL) AND (line_id IS NOT NULL)))
+    -- CHECK(((point_id != NULL) AND (line_id = NULL)) OR ((point_id = NULL) AND (line_id != NULL)))
 );
