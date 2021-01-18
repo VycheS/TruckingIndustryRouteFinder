@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- СОЗДАЁМ ТАБЛИЦЫ
 -- пользователь(user)
-CREATE TABLE user(
+CREATE TABLE user (
     id serial PRIMARY KEY,
     surname varchar(25) NOT NULL,
     name varchar(25) NOT NULL,
@@ -16,17 +16,17 @@ CREATE TABLE user(
     addjson jsonb
 );
 -- группы слоёв
-CREATE TABLE layer_group(
+CREATE TABLE layer_group (
     id serial PRIMARY KEY,
     name varchar(25) NOT NULL
 );
 -- ассоциативная таблица для создания многие ко многим между layer_group и user
-CREATE TABLE user_layer_group(
+CREATE TABLE user_layer_group (
     user_id integer REFERENCES user(id),
     layer_group_id integer REFERENCES layer_group(id)
 );
 -- слой
-CREATE TABLE layer(
+CREATE TABLE layer (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- генерируем по умолчанию uuid
     layer_group_id integer REFERENCES layer_group(id),
     name varchar(25) NOT NULL,
@@ -35,15 +35,15 @@ CREATE TABLE layer(
 );
 -- //TODO !!!!!!!!СДЕЛАТЬ чтобы наследовался только от layer либо point_layer либо line_layer но не одновременно
 -- слой точка, наследованный от таблицы слой
-CREATE TABLE point_layer(
+CREATE TABLE point_layer (
     id integer REFERENCES layer(id) PRIMARY KEY
 );
 -- слой линия, наследованный от таблицы слой
-CREATE TABLE line_layer(
+CREATE TABLE line_layer (
     id integer REFERENCES layer(id) PRIMARY KEY
 );
 -- точка
-CREATE TABLE point(
+CREATE TABLE point (
     id serial PRIMARY KEY,
     point_layer_id integer REFERENCES point_layer(id),
     name varchar(25) NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE point(
     addjson jsonb
 );
 -- линия
-CREATE TABLE line(
+CREATE TABLE line (
     id serial PRIMARY KEY,
     line_layer_id integer REFERENCES line_layer(id),
     name varchar(25) NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE line(
     addjson jsonb
 );
 -- пользовательский тип координата(coord)
-CREATE TYPE coord AS(
+CREATE TYPE coord AS (
     -- //TODO сделать проверку чтобы были заполнены оба поля
     -- широта
     latitude double precision,
@@ -67,12 +67,14 @@ CREATE TYPE coord AS(
     longitude double precision
 );
 -- сущность координата
-CREATE TABLE coordinate(
+CREATE TABLE coordinate (
     id serial PRIMARY KEY
     point_id integer REFERENCES point(id),
     line_id integer REFERENCES line(id),
-    coordinate coord[] NOT NULL -- //TODO сделать проверку для point что можно было ложить только один элемент
+    coordinate coord ARRAY NOT NULL, -- //TODO сделать проверку для point что можно было ложить только один элемент
     -- Проверка чтобы существовал только один внешний ключ point либо line
-    CHECK(((point_id IS NOT NULL) AND (line_id IS NULL)) OR ((point_id IS NULL) AND (line_id IS NOT NULL)))
+    CHECK (
+        ((point_id IS NOT NULL) AND (line_id IS NULL)) OR ((point_id IS NULL) AND (line_id IS NOT NULL))
+    )
     -- CHECK(((point_id != NULL) AND (line_id = NULL)) OR ((point_id = NULL) AND (line_id != NULL)))
 );
