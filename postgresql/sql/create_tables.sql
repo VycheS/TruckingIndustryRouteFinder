@@ -28,7 +28,7 @@ CREATE DOMAIN domain_coord AS coord CHECK (
 
 -- СОЗДАЁМ ТАБЛИЦЫ
 -- пользователь(client)
-CREATE TABLE client (
+CREATE TABLE client ( -- //TODO подключить модуль citext для удобства, он не учитывает регистр и внутри себя делает lower
     id serial PRIMARY KEY,
     surname varchar(25) NOT NULL, -- фамилия
     name varchar(25) NOT NULL,  -- имя
