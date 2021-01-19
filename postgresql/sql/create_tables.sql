@@ -2,12 +2,11 @@
 -- подключаем модуль в котором криптографические функции и генерация uuid
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ ДАННЫХ
+-- ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ ДАННЫХ И ДОМЕНЫ
 -- роль или права доступа(role_type)
 CREATE TYPE role_type AS ENUM (
-    'admin',
-    'client',
-    'driver'
+    'data_app',
+    'client'
 );
 -- тип слоя(layer_type)
 CREATE TYPE layer_type AS ENUM (
@@ -22,8 +21,7 @@ CREATE TYPE coord AS (
     longitude double precision
 );
 -- домен повверх coord
-CREATE DOMAIN domain_coord AS coord
-CHECK (
+CREATE DOMAIN domain_coord AS coord CHECK (
     -- проверка на отсутствие NULL
     ((VALUE).latitude IS NOT NULL) AND ((VALUE).longitude IS NOT NULL)
 );
@@ -35,9 +33,9 @@ CREATE TABLE client (
     surname varchar(25) NOT NULL, -- фамилия
     name varchar(25) NOT NULL,  -- имя
     patronymic varchar(25) NOT NULL,  -- отчество
-    email varchar(50) NOT NULL,
     password varchar NOT NULL,
-    numberphone varchar(25) NOT NULL,
+    email varchar(50) NOT NULL, -- //TODO добавить маску(домен) для почты
+    numberphone varchar(25) NOT NULL, -- //TODO добавить маску(домен) для номера телефона
     role role_type NOT NULL,
     addjson jsonb,
     -- проверка на уникальность
