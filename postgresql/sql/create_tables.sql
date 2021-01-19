@@ -3,13 +3,6 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ ДАННЫХ
--- координата(coord)
-CREATE TYPE coord AS (
-    -- широта
-    latitude double precision,
-    -- долгота
-    longitude double precision
-);
 -- роль или права доступа(role_type)
 CREATE TYPE role_type AS ENUM (
     'admin',
@@ -20,6 +13,19 @@ CREATE TYPE role_type AS ENUM (
 CREATE TYPE layer_type AS ENUM (
     'point',
     'line'
+);
+-- координата(coord)
+CREATE TYPE coord AS (
+    -- широта
+    latitude double precision,
+    -- долгота
+    longitude double precision
+);
+-- домен повверх coord
+CREATE DOMAIN domain_coord AS coord
+CHECK (
+    -- проверка на отсутствие NULL
+    ((VALUE).latitude IS NOT NULL) AND ((VALUE).longitude IS NOT NULL)
 );
 
 -- СОЗДАЁМ ТАБЛИЦЫ
@@ -60,8 +66,7 @@ CREATE TABLE geo_object (
     id serial PRIMARY KEY,
     layer_id uuid REFERENCES layer(id),
     name varchar(25) NOT NULL,
-    -- //TODO сделать проверку чтобы были заполнены оба поля
-    coordinate coord array NOT NULL, -- //TODO сделать проверку для point что можно было ложить только один элемент
+    coordinate domain_coord array NOT NULL, -- //TODO сделать проверку для point что можно было ложить только один элемент
     description text NOT NULL,
     addjson jsonb
 );
