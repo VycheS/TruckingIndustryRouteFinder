@@ -1,6 +1,8 @@
 -- МОДУЛИ
 -- подключаем модуль в котором криптографические функции и генерация uuid
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- подключаем модуль типа текст который не учитывает регистр и внутри себя делает lower(всегда маленький регистр)
+CREATE EXTENSION IF NOT EXISTS "citext";
 
 -- ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ ДАННЫХ И ДОМЕНЫ
 -- роль или права доступа(role_type)
@@ -20,21 +22,24 @@ CREATE TYPE coord AS (
     -- долгота
     longitude double precision
 );
--- домен повверх coord
+-- домен поверх coord с проверкой на отсутствие NULL
 CREATE DOMAIN domain_coord AS coord CHECK (
-    -- проверка на отсутствие NULL
-    ((VALUE).latitude IS NOT NULL) AND ((VALUE).longitude IS NOT NULL)
+    ((value).latitude IS NOT NULL) AND ((value).longitude IS NOT NULL)
+);
+-- домен поверх citext для почты
+CREATE DOMAIN email_type AS citext CHECK (
+    value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'
 );
 
 -- СОЗДАЁМ ТАБЛИЦЫ
 -- пользователь(client)
-CREATE TABLE client ( -- //TODO подключить модуль citext для удобства, он не учитывает регистр и внутри себя делает lower
+CREATE TABLE client (
     id serial PRIMARY KEY,
     surname varchar(25) NOT NULL, -- фамилия
     name varchar(25) NOT NULL,  -- имя
     patronymic varchar(25) NOT NULL,  -- отчество
     password varchar NOT NULL,
-    email varchar(50) NOT NULL, -- //TODO добавить маску(домен) для почты
+    email email_type NOT NULL,
     numberphone varchar(25) NOT NULL, -- //TODO добавить маску(домен) для номера телефона
     role role_type NOT NULL,
     addjson jsonb,
