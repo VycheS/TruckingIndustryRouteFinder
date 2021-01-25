@@ -43,14 +43,18 @@ services:
 
   web:
     container_name: web_container
-    # image: php:8.0-apache
-    build: ./dockerfiles/php
+    image: maven:3.6-openjdk-11
+    # build: ./dockerfiles/java
+    # environment:
+    #    - "SPRING_PROFILES_ACTIVE=local"
+    command: mvn spring-boot:run
     ports:
+      - 8080:8080
       - 80:80
       - 443:443
     volumes:
-      - ./src:/var/www/html
-      - ./log/apache2:/var/log/apache2
+      - ./src:/usr/src/mymaven:rw
+    working_dir: /usr/src/mymaven
     networks:
       - backend
     # restart: unless-stopped
