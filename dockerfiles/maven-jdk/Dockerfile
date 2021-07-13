@@ -6,7 +6,7 @@ FROM maven:3.6-openjdk-11
 # RUN mvn clean package
 
 # оставляем пустой, для того чтобы адекватно работал mvnw
-ENV MAVEN_CONFIG=""
+# ENV MAVEN_CONFIG=""
 
 EXPOSE 8080 80 443
 
