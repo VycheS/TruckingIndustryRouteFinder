@@ -45,9 +45,9 @@ services:
     container_name: app_container
     image: maven:3.6-openjdk-11
     # build: ./dockerfiles/maven-jdk
-    environment:
-      # очищаем, для того чтобы адекватно работал mvnw
-      - MAVEN_CONFIG
+    # environment:
+    #   # очищаем, для того чтобы адекватно работал mvnw
+    #   - MAVEN_CONFIG
     expose: 
       - 8080
       - 80
