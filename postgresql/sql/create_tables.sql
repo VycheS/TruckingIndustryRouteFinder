@@ -72,6 +72,7 @@ CREATE TABLE user_layer_group (
 CREATE TABLE layer (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- генерируем по умолчанию uuid
     layer_group_id integer REFERENCES layer_group(id),
+    type geo_obj_type,
     name varchar(25) NOT NULL,
     description text NOT NULL,
     addjson jsonb
@@ -81,6 +82,7 @@ CREATE TABLE geo_object (
     id serial PRIMARY KEY,
     layer_id uuid REFERENCES layer(id),
     name varchar(25) NOT NULL,
+    type geo_obj_type NOT NULL,
     coordinate domain_coord array NOT NULL, -- //TODO сделать проверку для point что можно было ложить только один элемент
     description text NOT NULL,
     addjson jsonb
