@@ -10,8 +10,8 @@ CREATE TYPE role_type AS ENUM (
     'data_app',
     'client'
 );
--- тип слоя(layer_type)
-CREATE TYPE layer_type AS ENUM (
+-- тип гео обьектов(geo_obj_type)
+CREATE TYPE geo_obj_type AS ENUM (
     'point',
     'line'
 );
