@@ -44,6 +44,6 @@ public class ClientDAO {
     }
 
     public Integer getCount() {
-        return jdbcTemplate.queryForObject("select count(*) from client", Integer.class);
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM client", Integer.class);
     }
 }
