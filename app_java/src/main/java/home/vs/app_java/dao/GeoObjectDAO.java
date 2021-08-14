@@ -1,6 +1,7 @@
 package home.vs.app_java.dao;
 
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -21,21 +22,59 @@ public class GeoObjectDAO {
 
     public List<GeoObjectDTO> getAll() {
         return jdbcTemplate.query("SELECT * FROM geo_object", new BeanPropertyRowMapper<>(GeoObjectDTO.class));
-    }
+    } //TODO подумать насчёт BeanPropertyRowMapper, возможно не будет работать, может придётся переделывать.
 
     public GeoObjectDTO get(int id) {
         return jdbcTemplate.query("SELECT * FROM geo_object WHERE id=?", new Object[]{id}, new int[]{Types.INTEGER}, new BeanPropertyRowMapper<>(GeoObjectDTO.class))
             .stream().findAny().orElse(null);
+    } //TODO подумать насчёт BeanPropertyRowMapper, возможно не будет работать, может придётся переделывать.
+
+    public void save(GeoObjectDTO geoObject) {
+        List<String> elements = new ArrayList<>(geoObject.getCoordinate().size());
+        List<Double> listDoubleCoordinates = new ArrayList<>();
+
+        for (GeoObjectDTO.Coordinate coordinate : geoObject.getCoordinate()) {
+            listDoubleCoordinates.add(coordinate.getLatitude());
+            listDoubleCoordinates.add(coordinate.getLongitude());
+
+            elements.add("ROW(?, ?)");
+        }
+        String inParamsCoordinate = "{" + String.join(",", elements) + "}";
+
+        String sql = "INSERT INTO "
+            + "geo_object(id, layer_id, name, type, description, addjson, coordinate) "
+            + "VALUES(?, ?, ?, ?, ?, ?, " + inParamsCoordinate + ")";
+
+        jdbcTemplate.update(
+            sql,
+            geoObject.getId(),
+            geoObject.getLayerId(),
+            geoObject.getName(), geoObject.getDescription(),
+            geoObject.getJson(), listDoubleCoordinates.toArray());
     }
 
-    public void save(GeoObjectDTO geoObject) { //TODO здесь нужно исправить что с координатами, чтобы передовать весь массив, возможно придётся в начале в цикле вытащить их потом при помощи временного файла положить в запрос
-        jdbcTemplate.update("INSERT INTO geo_object(id, layer_id, name, type, coordinate, description, addjson) VALUES(?, ?, ?, ?, ROW(?, ?), ?, ?)",
-            geoObject.getId(), geoObject.getLayerId(), geoObject.getName(), geoObject.getType(), geoObject.getCoordinate()[0].getLatitude(), geoObject.getCoordinate()[0].getLongitude(), geoObject.getDescription(), geoObject.getJson());
-    }
+    public void update(int id, GeoObjectDTO updatedGeoObject) {
+        List<String> elements = new ArrayList<>(updatedGeoObject.getCoordinate().size());
+        List<Double> listDoubleCoordinates = new ArrayList<>();
 
-    public void update(int id, GeoObjectDTO updatedGeoObject) { //TODO здесь нужно исправить что с координатами, чтобы передовать весь массив, возможно придётся в начале в цикле вытащить их потом при помощи временного файла положить в запрос
-        jdbcTemplate.update("UPDATE geo_object SET name=?, coordinate=ROW(?, ?), description=?, addjson=? WHERE id=?",
-            updatedGeoObject.getName(), updatedGeoObject.getCoordinate()[0].getLatitude(), updatedGeoObject.getCoordinate()[0].getLongitude(), updatedGeoObject.getDescription(), updatedGeoObject.getJson(), id);
+        for (GeoObjectDTO.Coordinate coordinate : updatedGeoObject.getCoordinate()) {
+            listDoubleCoordinates.add(coordinate.getLatitude());
+            listDoubleCoordinates.add(coordinate.getLongitude());
+
+            elements.add("ROW(?, ?)");
+        }
+        String inParamsCoordinate = "{" + String.join(",", elements) + "}";
+
+        String sql = "UPDATE geo_object SET name=?, description=?, addjson=?, "
+            + "coordinate=" + inParamsCoordinate + " WHERE id=?";
+        
+        jdbcTemplate.update(
+            sql,
+            updatedGeoObject.getName(),
+            updatedGeoObject.getDescription(),
+            updatedGeoObject.getJson(),
+            listDoubleCoordinates.toArray(),
+            id);
     }
 
     public void delete(int id) {
