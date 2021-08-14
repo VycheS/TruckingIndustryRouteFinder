@@ -1,6 +1,9 @@
 package home.vs.app_java.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GeoObjectDTO implements Serializable {
     // класс координата
@@ -38,7 +41,7 @@ public class GeoObjectDTO implements Serializable {
     private Integer layerId;
     private String name;
     private String type;
-    private Coordinate[] coordinate;
+    private List<Coordinate> coordinate = new ArrayList<>();
     private String description;
     private String json;
 
@@ -74,12 +77,16 @@ public class GeoObjectDTO implements Serializable {
         this.type = type;
     }
 
-    public Coordinate[] getCoordinate() {
+    public List<Coordinate> getCoordinate() {
         return coordinate;
     }
 
-    public void setCoordinate(Coordinate[] coordinate) {
+    public void setCoordinate(List<Coordinate> coordinate) {
         this.coordinate = coordinate;
+    }
+
+    public void setCoordinate(Coordinate coordinate) {
+        this.coordinate = Arrays.asList(coordinate);
     }
 
     public String getDescription() {
