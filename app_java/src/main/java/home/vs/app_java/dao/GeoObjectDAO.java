@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import home.vs.app_java.dto.GeoObjectDTO;
+import home.vs.app_java.dto.CoordinateDTO;
 
 
 @Component
@@ -30,16 +31,16 @@ public class GeoObjectDAO {
     } //TODO подумать насчёт BeanPropertyRowMapper, возможно не будет работать, может придётся переделывать.
 
     public void save(GeoObjectDTO geoObject) {
-        List<String> elements = new ArrayList<>(geoObject.getCoordinate().size());
+        List<String> coordinateTemplate = new ArrayList<>(geoObject.getCoordinate().size());
         List<Double> listDoubleCoordinates = new ArrayList<>();
 
-        for (GeoObjectDTO.Coordinate coordinate : geoObject.getCoordinate()) {
+        for (CoordinateDTO coordinate : geoObject.getCoordinate()) {
             listDoubleCoordinates.add(coordinate.getLatitude());
             listDoubleCoordinates.add(coordinate.getLongitude());
 
-            elements.add("ROW(?, ?)");
+            coordinateTemplate.add("ROW(?, ?)");
         }
-        String inParamsCoordinate = "{" + String.join(",", elements) + "}";
+        String inParamsCoordinate = "{" + String.join(",", coordinateTemplate) + "}";
 
         String sql = "INSERT INTO "
             + "geo_object(id, layer_id, name, type, description, addjson, coordinate) "
@@ -54,16 +55,16 @@ public class GeoObjectDAO {
     }
 
     public void update(int id, GeoObjectDTO updatedGeoObject) {
-        List<String> elements = new ArrayList<>(updatedGeoObject.getCoordinate().size());
+        List<String> coordinateTemplate = new ArrayList<>(updatedGeoObject.getCoordinate().size());
         List<Double> listDoubleCoordinates = new ArrayList<>();
 
-        for (GeoObjectDTO.Coordinate coordinate : updatedGeoObject.getCoordinate()) {
+        for (CoordinateDTO coordinate : updatedGeoObject.getCoordinate()) {
             listDoubleCoordinates.add(coordinate.getLatitude());
             listDoubleCoordinates.add(coordinate.getLongitude());
 
-            elements.add("ROW(?, ?)");
+            coordinateTemplate.add("ROW(?, ?)");
         }
-        String inParamsCoordinate = "{" + String.join(",", elements) + "}";
+        String inParamsCoordinate = "{" + String.join(",", coordinateTemplate) + "}";
 
         String sql = "UPDATE geo_object SET name=?, description=?, addjson=?, "
             + "coordinate=" + inParamsCoordinate + " WHERE id=?";
