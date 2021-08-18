@@ -6,34 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GeoObjectDTO implements Serializable {
-    // класс координата
-    public class Coordinate implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        private double latitude; // широта
-        private double longitude; // долгота
-
-        public Coordinate(double latitude, double longitude) {
-            this.setLatitude(latitude);
-            this.setLongitude(longitude);
-        }
-
-        public double getLatitude() {
-            return latitude;
-        }
-
-        public void setLatitude(double latitude) {
-            this.latitude = latitude;
-        }
-
-        public double getLongitude() {
-            return longitude;
-        }
-
-        public void setLongitude(double longitude) {
-            this.longitude = longitude;
-        }
-    }
 
     private static final long serialVersionUID = 1L;
 
@@ -41,7 +13,7 @@ public class GeoObjectDTO implements Serializable {
     private Integer layerId;
     private String name;
     private String type;
-    private List<Coordinate> coordinate = new ArrayList<>();
+    private List<CoordinateDTO> coordinate = new ArrayList<>();
     private String description;
     private String json;
 
@@ -77,15 +49,15 @@ public class GeoObjectDTO implements Serializable {
         this.type = type;
     }
 
-    public List<Coordinate> getCoordinate() {
+    public List<CoordinateDTO> getCoordinate() {
         return coordinate;
     }
 
-    public void setCoordinate(List<Coordinate> coordinate) {
+    public void setCoordinate(List<CoordinateDTO> coordinate) {
         this.coordinate = coordinate;
     }
 
-    public void setCoordinate(Coordinate coordinate) {
+    public void setCoordinate(CoordinateDTO coordinate) {
         this.coordinate = Arrays.asList(coordinate);
     }
 
