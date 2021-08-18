@@ -4,11 +4,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import home.vs.app_java.dto.GeoObjectDTO;
+import home.vs.app_java.mappers.GeoObjectMapper;
 import home.vs.app_java.dto.CoordinateDTO;
 
 
@@ -22,17 +22,17 @@ public class GeoObjectDAO {
     }
 
     public List<GeoObjectDTO> getAll() {
-        return jdbcTemplate.query("SELECT * FROM geo_object", new BeanPropertyRowMapper<>(GeoObjectDTO.class));
-    } //TODO подумать насчёт BeanPropertyRowMapper, возможно не будет работать, может придётся переделывать.
+        return jdbcTemplate.query("SELECT * FROM geo_object", new GeoObjectMapper());
+    }
 
     public GeoObjectDTO get(int id) {
-        return jdbcTemplate.query("SELECT * FROM geo_object WHERE id=?", new Object[]{id}, new int[]{Types.INTEGER}, new BeanPropertyRowMapper<>(GeoObjectDTO.class))
+        return jdbcTemplate.query("SELECT * FROM geo_object WHERE id=?", new Object[]{id}, new int[]{Types.INTEGER}, new GeoObjectMapper())
             .stream().findAny().orElse(null);
-    } //TODO подумать насчёт BeanPropertyRowMapper, возможно не будет работать, может придётся переделывать.
+    }
 
     public void save(GeoObjectDTO geoObject) {
         List<String> coordinateTemplate = new ArrayList<>(geoObject.getCoordinate().size());
-        List<Double> listDoubleCoordinates = new ArrayList<>();
+        List<Double> listDoubleCoordinates = new ArrayList<>(geoObject.getCoordinate().size() * 2);
 
         for (CoordinateDTO coordinate : geoObject.getCoordinate()) {
             listDoubleCoordinates.add(coordinate.getLatitude());
@@ -42,16 +42,17 @@ public class GeoObjectDAO {
         }
         String inParamsCoordinate = "{" + String.join(",", coordinateTemplate) + "}";
 
-        String sql = "INSERT INTO "
-            + "geo_object(id, layer_id, name, type, description, addjson, coordinate) "
+        String sql = "INSERT INTO geo_object(id, layer_id, name, type, description, addjson, coordinate) "
             + "VALUES(?, ?, ?, ?, ?, ?, " + inParamsCoordinate + ")";
 
         jdbcTemplate.update(
             sql,
             geoObject.getId(),
             geoObject.getLayerId(),
-            geoObject.getName(), geoObject.getDescription(),
-            geoObject.getJson(), listDoubleCoordinates.toArray());
+            geoObject.getName(),
+            geoObject.getDescription(),
+            geoObject.getJson(),
+            listDoubleCoordinates.toArray());
     }
 
     public void update(int id, GeoObjectDTO updatedGeoObject) {
@@ -66,8 +67,10 @@ public class GeoObjectDAO {
         }
         String inParamsCoordinate = "{" + String.join(",", coordinateTemplate) + "}";
 
-        String sql = "UPDATE geo_object SET name=?, description=?, addjson=?, "
-            + "coordinate=" + inParamsCoordinate + " WHERE id=?";
+        String sql = 
+            "UPDATE geo_object "
+            + "SET name=?, description=?, addjson=?, coordinate=" + inParamsCoordinate + " "
+            + "WHERE id=?";
         
         jdbcTemplate.update(
             sql,
