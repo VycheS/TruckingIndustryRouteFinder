@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 public class GeoObjectMapper implements RowMapper<GeoObjectDTO> {
@@ -18,7 +19,9 @@ public class GeoObjectMapper implements RowMapper<GeoObjectDTO> {
     public GeoObjectDTO mapRow(ResultSet rs, int i) throws SQLException {
         GeoObjectDTO geoObject = new GeoObjectDTO();
         geoObject.setId(rs.getInt("id"));
-        geoObject.setLayerId(rs.getInt("layer_id"));
+        String strUUID = rs.getString("layer_id");
+        UUID uuid = UUID.fromString(strUUID);
+        geoObject.setLayerId(uuid);
         geoObject.setName(rs.getString("name"));
         geoObject.setType(rs.getString("type"));
 
