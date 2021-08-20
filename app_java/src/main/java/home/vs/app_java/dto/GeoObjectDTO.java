@@ -4,13 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class GeoObjectDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private Integer id;
-    private Integer layerId;
+    private UUID layerId;
     private String name;
     private String type;
     private List<CoordinateDTO> coordinate = new ArrayList<>();
@@ -25,11 +26,11 @@ public class GeoObjectDTO implements Serializable {
         this.id = id;
     }
 
-    public Integer getLayerId() {
+    public UUID getLayerId() {
         return layerId;
     }
 
-    public void setLayerId(Integer layerId) {
+    public void setLayerId(UUID layerId) {
         this.layerId = layerId;
     }
 
