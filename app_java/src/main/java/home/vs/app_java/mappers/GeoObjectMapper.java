@@ -18,12 +18,9 @@ public class GeoObjectMapper implements RowMapper<GeoObjectDTO> {
     @Override
     public GeoObjectDTO mapRow(ResultSet rs, int i) throws SQLException {
         GeoObjectDTO geoObject = new GeoObjectDTO();
-        geoObject.setId(rs.getInt("id"));
+        
         String strUUID = rs.getString("layer_id");
         UUID uuid = UUID.fromString(strUUID);
-        geoObject.setLayerId(uuid);
-        geoObject.setName(rs.getString("name"));
-        geoObject.setType(rs.getString("type"));
 
         Array arrSqlCoord = rs.getArray("coordinate");
         Struct[] arrStructSqlCoord = (Struct[])arrSqlCoord.getArray();
@@ -35,6 +32,10 @@ public class GeoObjectMapper implements RowMapper<GeoObjectDTO> {
             coordinates.add(new CoordinateDTO((Double)objCoord[0], (Double)objCoord[1]));
         }
 
+        geoObject.setId(rs.getInt("id"));
+        geoObject.setLayerId(uuid);
+        geoObject.setName(rs.getString("name"));
+        geoObject.setType(rs.getString("type"));
         geoObject.setCoordinate(coordinates);
         geoObject.setDescription(rs.getString("description"));
         geoObject.setJson(rs.getString("addjson"));
