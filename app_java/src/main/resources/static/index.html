@@ -7,11 +7,15 @@
 </head>
 
 <body>
-    <p>Hello anonymous</p>
-    <form action="/home" method="get">
-        <input type="text" name=name placeholder="Please, paste name here">
-        <input type="submit" value="Navigate to the home page">
+    <form name="MyForm" id="callbacks" action="" method="post">
+        <input name="name" type="text" placeholder="Ваше имя" /><br /><br />
+        <input name="phone" type="tel" placeholder="Ваш телефон" /><br /><br />
+        <textarea name="body" placeholder="Ваше сообщение"></textarea><br /><br />
+        <input id="submit" type="submit" name="done" />
     </form>
+    <div id="erconts" style="display: none">
+    </div>
+    <script src="./ajaxtest.js"></script>
 </body>
 
 </html>
