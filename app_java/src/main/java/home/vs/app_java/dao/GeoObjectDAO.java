@@ -31,10 +31,10 @@ public class GeoObjectDAO {
     }
 
     public void save(GeoObjectDTO geoObject) {
-        List<String> coordinateTemplate = new ArrayList<>(geoObject.getCoordinate().size());
-        List<Double> listDoubleCoordinates = new ArrayList<>(geoObject.getCoordinate().size() * 2);
+        List<String> coordinateTemplate = new ArrayList<>(geoObject.getCoordinates().size());
+        List<Double> listDoubleCoordinates = new ArrayList<>(geoObject.getCoordinates().size() * 2);
 
-        for (CoordinateDTO coordinate : geoObject.getCoordinate()) {
+        for (CoordinateDTO coordinate : geoObject.getCoordinates()) {
             listDoubleCoordinates.add(coordinate.getLatitude());
             listDoubleCoordinates.add(coordinate.getLongitude());
 
@@ -56,10 +56,10 @@ public class GeoObjectDAO {
     }
 
     public void update(int id, GeoObjectDTO updatedGeoObject) {
-        List<String> coordinateTemplate = new ArrayList<>(updatedGeoObject.getCoordinate().size());
+        List<String> coordinateTemplate = new ArrayList<>(updatedGeoObject.getCoordinates().size());
         List<Double> listDoubleCoordinates = new ArrayList<>();
 
-        for (CoordinateDTO coordinate : updatedGeoObject.getCoordinate()) {
+        for (CoordinateDTO coordinate : updatedGeoObject.getCoordinates()) {
             listDoubleCoordinates.add(coordinate.getLatitude());
             listDoubleCoordinates.add(coordinate.getLongitude());
 

@@ -2,7 +2,6 @@ package home.vs.app_java.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ public class GeoObjectDTO implements Serializable {
     private UUID layerId;
     private String name;
     private String type;
-    private List<CoordinateDTO> coordinate = new ArrayList<>();
+    private List<CoordinateDTO> coordinates = new ArrayList<>();
     private String description;
     private String json;
 
@@ -50,16 +49,12 @@ public class GeoObjectDTO implements Serializable {
         this.type = type;
     }
 
-    public List<CoordinateDTO> getCoordinate() {
-        return coordinate;
+    public List<CoordinateDTO> getCoordinates() {
+        return this.coordinates;
     }
 
-    public void setCoordinate(List<CoordinateDTO> coordinate) {
-        this.coordinate = coordinate;
-    }
-
-    public void setCoordinate(CoordinateDTO coordinate) {
-        this.coordinate = Arrays.asList(coordinate);
+    public void setCoordinates(List<CoordinateDTO> coordinates) {
+        this.coordinates = coordinates;
     }
 
     public String getDescription() {
