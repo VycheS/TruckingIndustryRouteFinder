@@ -14,7 +14,7 @@ public class ClientDTO implements Serializable {
     private String email;
     private String numberphone;
     private String role;
-    private String json;
+    private String strJson;
 
     public Integer getId() {
         return id;
@@ -80,11 +80,12 @@ public class ClientDTO implements Serializable {
         this.role = role;
     }
     
-    public String getJson() {
-        return json;
+    public String getStrJson() {
+        return strJson;
     }
-
-    public void setJson(String json) {
-        this.json = json;
+    
+     //TODO поправить данные при помощи JAKSON, чтобы на вход был объект а хранил string
+    public void setStrJson(String json) {
+        this.strJson = json;
     }
 }

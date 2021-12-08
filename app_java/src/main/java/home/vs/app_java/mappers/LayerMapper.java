@@ -21,7 +21,7 @@ public class LayerMapper implements RowMapper<LayerDTO> {
         layer.setTypeObj(rs.getString("type_obj"));
         layer.setName(rs.getString("name"));
         layer.setDescription(rs.getString("description"));
-        layer.setJson(rs.getString("addjson"));
+        layer.setJson(rs.getString("json_data"));
 
         return layer;
     }

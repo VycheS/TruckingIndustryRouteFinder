@@ -36,7 +36,7 @@ public class LayerGroupDAO {
 
     public void update(int id, LayerGroupDTO layerGroup) {
         String sql = "UPDATE layer_group SET name=? WHERE id=?";
-        jdbcTemplate.update(sql, layerGroup.getName(), layerGroup.getId());
+        jdbcTemplate.update(sql, layerGroup.getName(), id);
     }
 
     public void delete(int id) {

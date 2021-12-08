@@ -38,7 +38,7 @@ public class GeoObjectMapper implements RowMapper<GeoObjectDTO> {
         geoObject.setType(rs.getString("type"));
         geoObject.setCoordinates(coordinates);
         geoObject.setDescription(rs.getString("description"));
-        geoObject.setJson(rs.getString("addjson"));
+        geoObject.setJson(rs.getString("json_data"));
 
         return geoObject;
     }
