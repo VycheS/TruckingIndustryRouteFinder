@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 -- ПОЛЬЗОВАТЕЛЬСКИЕ ТИПЫ ДАННЫХ И ДОМЕНЫ
 -- роль или права доступа(role_type)
 CREATE TYPE role_type AS ENUM (
-    'data_app',
+    'application',
     'client'
 );
 -- тип гео обьектов(geo_obj_type)
@@ -54,9 +54,9 @@ CREATE TABLE client (
     email email_type NOT NULL,
     numberphone phone_type NOT NULL,
     role role_type NOT NULL,
-    addjson jsonb,
+    json_data jsonb,
     -- проверка на уникальность
-    UNIQUE (email, numberphone)
+    UNIQUE (email, numberphone) --//TODO сделать так чтобы это значение давало уникальность не в сумме а единолично. Просто подписать UNIQUE на емайл и на телефон и стереть общий.
 );
 -- группы слоёв
 CREATE TABLE layer_group (
@@ -75,7 +75,7 @@ CREATE TABLE layer (
     type geo_obj_type,
     name varchar(25) NOT NULL,
     description text NOT NULL,
-    addjson jsonb
+    json_data jsonb
 );
 -- гео объект
 CREATE TABLE geo_object (
@@ -85,5 +85,5 @@ CREATE TABLE geo_object (
     type geo_obj_type NOT NULL,
     coordinate domain_coord array NOT NULL, -- //TODO сделать проверку для point что можно было ложить только один элемент
     description text NOT NULL,
-    addjson jsonb
+    json_data jsonb
 );
