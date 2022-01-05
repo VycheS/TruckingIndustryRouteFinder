@@ -15,7 +15,7 @@ public class GeoObjectDTO implements Serializable {
     private String type;
     private List<CoordinateDTO> coordinates = new ArrayList<>();
     private String description;
-    private String json;
+    private String strJson;
 
     public Integer getId() {
         return id;
@@ -65,11 +65,11 @@ public class GeoObjectDTO implements Serializable {
         this.description = description;
     }
 
-    public String getJson() {
-        return json;
+    public String getStrJson() {
+        return this.strJson;
     }
 
-    public void setJson(String json) {
-        this.json = json;
+    public void setStrJson(String json) {
+        this.strJson = json;
     }
 }
