@@ -33,7 +33,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public boolean update(ClientDTO client, int id) {
-        if (this.clientDAO.get(id) != null) { //TODO сделать нормальную обработку ошибок
+        if (this.clientDAO.get(id) != null) {
             this.clientDAO.update(id, client);
             return true;
         }
@@ -42,7 +42,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public boolean delete(int id) {
-        if (this.clientDAO.get(id) != null) { //TODO сделать нормальную обработку ошибок
+        if (this.clientDAO.get(id) != null) {
             this.clientDAO.delete(id);
             return true;
         }

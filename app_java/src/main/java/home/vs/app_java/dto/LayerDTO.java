@@ -11,7 +11,7 @@ public class LayerDTO implements Serializable {
     private String typeObj;
     private String name;
     private String description;
-    private String json;
+    private String strJson;
 
     public UUID getId() {
         return id;
@@ -43,11 +43,11 @@ public class LayerDTO implements Serializable {
     public void setDescription(String description) {
         this.description = description;
     }
-    public String getJson() {
-        return json;
+    public String getStrJson() {
+        return this.strJson;
     }
-    public void setJson(String json) {
-        this.json = json;
+    public void setStrJson(String json) {
+        this.strJson = json;
     }
 
     

@@ -1,5 +1,6 @@
 package home.vs.app_java.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -12,56 +13,100 @@ import home.vs.app_java.mappers.LayerMapper;
 
 
 @Component
-public class LayerDAO {
+public final class LayerDAO {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private static final String SQL_SELECT_DEPENDENT_TABLES = "SELECT layer_group.*\n"
+                                                            + "FROM user_layer_group\n"
+                                                            + "JOIN layer_group ON\n"
+                                                                + "user_layer_group.layer_group_id = layer_group.id\n"
+                                                                + "AND layer_group.id = ?\n"
+                                                            + "JOIN client ON\n"
+                                                                + "user_layer_group.client_id = client.id\n"
+                                                                + "AND client.id = ?";
+
+    @Autowired
     public LayerDAO(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<LayerDTO> getAll() {
-        return this.jdbcTemplate.query("SELECT * FROM layer", new LayerMapper());
+    public List<LayerDTO> getAll(int layerGroupId, int clientId) {
+        final String sql = "WITH selected_lg AS (\n"
+                            +  SQL_SELECT_DEPENDENT_TABLES
+                        +  ")\n"
+                        +  "SELECT layer.*\n"
+                        +  "FROM layer\n"
+                        +  "JOIN selected_lg ON\n"
+                            +  "layer.layer_group_id = selected_lg.id";
+        return this.jdbcTemplate.query(sql, new Object[]{layerGroupId, clientId}, new int[]{Types.INTEGER, Types.INTEGER}, new LayerMapper());
     }
 
-    public LayerDTO get(UUID id) {
-        return this.jdbcTemplate.query(
-            "SELECT * FROM layer WHERE id=?",
-            new Object[]{id},
-            new int[]{Types.JAVA_OBJECT},
-            new LayerMapper()
-        ).stream().findAny().orElse(null);
+    public LayerDTO get(UUID id, int layerGroupId, int clientId) {
+        final String sql = "WITH selected_lg AS (\n"
+                        +SQL_SELECT_DEPENDENT_TABLES
+                    +")\n"
+                    +"SELECT layer.*\n"
+                    +"FROM layer\n"
+                    +"JOIN selected_lg ON\n"
+                        +"layer.layer_group_id = selected_lg.id\n"
+                        +"AND layer.id = ?";
+        return this.jdbcTemplate
+                .query(
+                    sql,
+                    new Object[]{layerGroupId, clientId, id},
+                    new int[]{Types.INTEGER, Types.INTEGER, Types.OTHER},
+                    new LayerMapper()
+                )
+                .stream()
+                .findAny()
+                .orElse(null);
     }
 
-    public void save(LayerDTO layer) {
-        String sql = "INSERT INTO layer(id, layer_group_id, type_obj, name, description, addjson) "
-            + "VALUES(?, ?, ?, ?, ?, ?)";
-        this.jdbcTemplate.update(
-            sql,
-            layer.getId(),
-            layer.getLayerGroupId(),
-            layer.getTypeObj(),
-            layer.getName(),
-            layer.getDescription(),
-            layer.getJson()
-        );
+    public boolean save(LayerDTO layer, int layerGroupId, int clientId) {
+        if (this.entityIdExists(layerGroupId, clientId)) {
+            final String sql = "INSERT INTO layer(layer_group_id, type, name, description, json_data)\n"
+                        +"VALUES(?, ?, ?, ?, ?)";
+            layer.setLayerGroupId(layerGroupId);
+            return this.jdbcTemplate.update(
+                    sql,
+                    new Object[]{layer.getLayerGroupId(), layer.getTypeObj(), layer.getName(), layer.getDescription(), layer.getStrJson()},
+                    new int[]{Types.INTEGER, Types.OTHER, Types.VARCHAR, Types.VARCHAR, Types.OTHER}
+                ) > 0;
+                
+        }
+        return false;
     }
 
-    public void update(UUID id, LayerDTO updatedLayer) {
-        String sql = "UPDATE layer SET layer_group_id=?, type_obj=?, name=?, description=?, addjson=? WHERE id=?";
-        this.jdbcTemplate.update(
-            sql,
-            updatedLayer.getLayerGroupId(),
-            updatedLayer.getTypeObj(),
-            updatedLayer.getName(),
-            updatedLayer.getDescription(),
-            updatedLayer.getJson(),
-            id
-        );
+    public boolean update(LayerDTO updatedLayer, UUID id, int layerGroupId, int clientId) {
+        if (this.entityIdExists(layerGroupId, clientId)) {
+            final String sql = "UPDATE layer\n"
+                            +  "SET layer_group_id = ?, type = ?, name = ?, description = ?, json_data = ?\n"
+                            +  "WHERE id=?";
+            updatedLayer.setId(id);
+            updatedLayer.setLayerGroupId(layerGroupId);
+            return this.jdbcTemplate.update(sql,
+                new Object[]{updatedLayer.getLayerGroupId(), updatedLayer.getTypeObj(), updatedLayer.getName(), updatedLayer.getDescription(), updatedLayer.getStrJson(), updatedLayer.getId()},
+                new int[]{Types.INTEGER, Types.OTHER, Types.VARCHAR, Types.VARCHAR, Types.OTHER, Types.OTHER}
+            ) > 0;
+        }
+        return false;
     }
 
-    public void delete(UUID id) {
-        this.jdbcTemplate.update("DELETE FROM layer WHERE id=?", id);
+    public boolean delete(UUID id, int layerGroupId, int clientId) {
+        if (this.entityIdExists(layerGroupId, clientId)) {
+            final String sql = "DELETE FROM layer\n"
+                            +  "WHERE id = ?";
+            return this.jdbcTemplate.update(sql, id) > 0;
+        }
+        return false;
+    }
+
+    private boolean entityIdExists(int layerGroupId, int clientId) {
+        final String SQL_EXIST_DEPENDENT_TABLES =  "SELECT EXISTS("
+                                                        + SQL_SELECT_DEPENDENT_TABLES
+                                                + ")";
+        return this.jdbcTemplate.queryForObject(SQL_EXIST_DEPENDENT_TABLES, Boolean.class, layerGroupId, clientId);
     }
     
 }
