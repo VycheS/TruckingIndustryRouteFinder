@@ -8,7 +8,12 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 -- роль или права доступа(role_type)
 CREATE TYPE role_type AS ENUM (
     'application',
-    'client'
+    'super_administrator',
+    'client_administrator',
+    'read-write_client',
+    'read-only_client',
+    'driver'
+
 );
 -- тип гео обьектов(geo_obj_type)
 CREATE TYPE geo_obj_type AS ENUM (
@@ -51,12 +56,10 @@ CREATE TABLE client (
     name name_type NOT NULL,  -- имя
     patronymic name_type NOT NULL,  -- отчество
     password varchar(255) NOT NULL,
-    email email_type NOT NULL,
-    numberphone phone_type NOT NULL,
+    email email_type UNIQUE NOT NULL,
+    numberphone phone_type UNIQUE NOT NULL,
     role role_type NOT NULL,
-    json_data jsonb,
-    -- проверка на уникальность
-    UNIQUE (email, numberphone) --//TODO сделать так чтобы это значение давало уникальность не в сумме а единолично. Просто подписать UNIQUE на емайл и на телефон и стереть общий.
+    json_data jsonb
 );
 -- группы слоёв
 CREATE TABLE layer_group (
@@ -65,24 +68,25 @@ CREATE TABLE layer_group (
 );
 -- ассоциативная таблица для создания многие ко многим между layer_group и client
 CREATE TABLE user_layer_group (
-    client_id integer REFERENCES client(id),
-    layer_group_id integer REFERENCES layer_group(id)
+    client_id integer REFERENCES client(id) ON DELETE RESTRICT,
+    layer_group_id integer REFERENCES layer_group(id) ON DELETE CASCADE
 );
 -- слой
 CREATE TABLE layer (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(), -- генерируем по умолчанию uuid
-    layer_group_id integer REFERENCES layer_group(id),
+    layer_group_id integer REFERENCES layer_group(id) ON DELETE CASCADE,
     type geo_obj_type, --//TODO подумать как под другому переименовать эту переменную
     name varchar(25) NOT NULL,
     description text NOT NULL,
     json_data jsonb
 );
 -- гео объект
-CREATE TABLE geo_object (
+CREATE TABLE geo_object ( --//TODO возможно придётся создать отдельные таблицы для point и line
     id serial PRIMARY KEY,
-    layer_id uuid REFERENCES layer(id),
+    layer_id uuid REFERENCES layer(id) ON DELETE CASCADE,
     name varchar(25) NOT NULL,
     type geo_obj_type NOT NULL, --//TODO подумать как под другому переименовать эту переменную
+    forward_arrow_direction boolean , --если null то это не стрелка, если true то направление вперед, если false то направление в обратную сторону
     coordinate domain_coord array NOT NULL, -- //TODO сделать проверку для point что можно было ложить только один элемент
     description text NOT NULL,
     json_data jsonb
