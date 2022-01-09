@@ -5,11 +5,30 @@
 //подключение api карты
 addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-1d3b6eda314d&load=package.full&lang=ru_RU'], { async: true })
     //подключение своих модулей карты
-    .then(script => addScripts('./js/libs/map_modules/', ['arrow.js',]))
+    .then(script => addScripts('./js/app/map/module/', ['arrow.js',]))
     /* Функция ymaps.ready() будет вызвана, когда загрузятся 
     все компоненты API, а также когда будет готово DOM-дерево. */
-    .then(script => ymaps.ready().then(
-        script => addScripts('./js/libs/classes/',
+    .then(script => ymaps.ready()
+        .then(script => addScripts('./js/app/dto/extends/',['DTO.js']))
+        .then(script => addScripts('./js/app/dto/',
+            [
+                'CoordinateDTO.js',
+                'ClientDTO.js',
+                'GeoObjectDTO.js',
+                'LayerGroupDTO.js',
+                'LayerDTO.js'
+            ]
+        ))
+        .then(script => addScripts('./js/app/restapi/extends/',['CRUD.js']))
+        .then(script => addScripts('./js/app/restapi/',
+            [
+                'ClientCRUD.js',
+                'GeoObjectCRUD.js',
+                'LayerGroupCRUD.js',
+                'LayerCRUD.js'
+            ]
+        ))
+        .then(script => addScripts('./js/app/map/extension/',
             [
                 'LayerGeoObj.js',
                 'LayerManager.js',
@@ -19,17 +38,26 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
                 'MapLegendControl.js'
             ]
         ))
+        .then(script => addScripts('./js/app/service/',
+        [
+            'PointingArrow.js',
+            'Goods.js',
+            'Route.js',
+            'Store.js',
+            'Truck.js'
+        ]
+    ))
         //подключение главного класса
-        .then(script => addScripts('./js/App/', ['App.js']))
+        .then(script => addScripts('./js/app/', ['App.js']))
         //подключение главного стартового скрипта
         .then(script => addScripts('./js/', ['main.js']))
     )
 
 
 //---------------ФУНКЦИЯ ДОБАВЛЕНИЯ СКРИПТОВ----------------------
-function addScripts(path, scripts, options = { async: false, appendTo: 'body' }) {
+async function addScripts(path, scripts, options = { async: true, appendTo: 'body' }) {
     //возвращаем промисс чтобы подключить следующий скрипт после подключения этого
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
         //локальные стандартные настройки добавления скриптов
         let addOptions = {
             async: false,
