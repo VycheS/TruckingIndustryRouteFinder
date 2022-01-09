@@ -17,10 +17,6 @@
 		<java.version>11</java.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -58,17 +54,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<configuration>
-					<mainClass>home.vs.app_java.AppJavaApplication</mainClass>
-					<arguments>
-						<argument>-Dproperty=first</argument>
-						<argument>-Dproperty=second</argument>
-					</arguments>
-				</configuration>
-        	</plugin> -->
 		</plugins>
 	</build>
 

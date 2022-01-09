@@ -9,6 +9,7 @@ public class LayerDTO implements Serializable {
     private UUID id;
     private int layerGroupId;
     private String typeObj;
+    private Boolean forwardArrowDirection;
     private String name;
     private String description;
     private String strJson;
@@ -30,6 +31,12 @@ public class LayerDTO implements Serializable {
     }
     public void setTypeObj(String typeObj) {
         this.typeObj = typeObj;
+    }
+    public Boolean getForwardArrowDirection() {
+        return forwardArrowDirection;
+    }
+    public void setForwardArrowDirection(Boolean forwardArrowDirection) {
+        this.forwardArrowDirection = forwardArrowDirection;
     }
     public String getName() {
         return name;
