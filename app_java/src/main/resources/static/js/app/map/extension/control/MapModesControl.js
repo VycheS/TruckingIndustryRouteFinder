@@ -43,10 +43,10 @@ class MapModesControl {
         });
 
 
-        //создаём элемент для включения режима редактирования карты
+        //создаём элемент для включения режима редактирования информационных слоёв
         let editInformation = new ymaps.control.ListBoxItem({
             data: {
-                content: 'Редактирование информационных слоёв'
+                content: 'Редактирование слоёв информационных'
             },
             state: {
                 selected: false
@@ -67,6 +67,16 @@ class MapModesControl {
             this._map.behaviors.disable(['drag']);
             //снимаем галочку с режима просмотра
             view.deselect();
+        });
+
+        //создаём элемент для включения режима редактирования слоёв грузоперевозок
+        let editTruckingIndustry = new ymaps.control.ListBoxItem({ //TODO ДОДЕЛАТЬ!!!!!!!
+            data: {
+                content: 'Редактирование слоёв грузоперевозок'
+            },
+            state: {
+                selected: false
+            },
         });
         
         return [view, editInformation];
