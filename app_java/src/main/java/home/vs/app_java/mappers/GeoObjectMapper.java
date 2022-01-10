@@ -21,6 +21,11 @@ public class GeoObjectMapper implements RowMapper<GeoObjectDTO> {
         geoObject.setLayerId(uuid);
         geoObject.setName(rs.getString("name"));
         geoObject.setType(rs.getString("type"));
+        if (rs.getObject("forward_arrow_direction") == null) {
+            geoObject.setForwardArrowDirection(null);
+        } else {
+            geoObject.setForwardArrowDirection(rs.getBoolean("forward_arrow_direction"));
+        }
         geoObject.setDescription(rs.getString("description"));
         geoObject.setStrJson(rs.getString("json_data"));
 

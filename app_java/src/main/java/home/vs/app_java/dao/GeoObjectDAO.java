@@ -50,7 +50,7 @@ public class GeoObjectDAO {
     }
 
     public List<GeoObjectDTO> getAll(UUID layerId, int layerGroupId, int clientId) {
-        final String sqlSelectAllWithoutCoordinates = "SELECT geo_object.id, geo_object.name, geo_object.layer_id, geo_object.type, geo_object.description, geo_object.json_data\n";
+        final String sqlSelectAllWithoutCoordinates = "SELECT geo_object.id, geo_object.name, geo_object.layer_id, geo_object.type, geo_object.forward_arrow_direction, geo_object.description, geo_object.json_data\n";
         final String sqlSelectIdAndCoordinates = "SELECT geo_object.id, geo_object.coordinate\n";
         final String sqlGetGeoObject = SQL_SELECTED_LAYER
                                     +  sqlSelectAllWithoutCoordinates
@@ -98,7 +98,7 @@ public class GeoObjectDAO {
     }
 
     public GeoObjectDTO get(int id, UUID layerId, int layerGroupId, int clientId) {
-        final String sqlSelectAllWithoutCoordinates = "SELECT geo_object.id, geo_object.name, geo_object.layer_id, geo_object.type, geo_object.description, geo_object.json_data\n";
+        final String sqlSelectAllWithoutCoordinates = "SELECT geo_object.id, geo_object.name, geo_object.layer_id, geo_object.type, geo_object.forward_arrow_direction, geo_object.description, geo_object.json_data\n";
         final String sqlSelectCoordinates = "SELECT geo_object.coordinate\n";
         final String sqlGetGeoObject = SQL_SELECTED_LAYER
                                     +  sqlSelectAllWithoutCoordinates
@@ -138,8 +138,8 @@ public class GeoObjectDAO {
             geoObject.setLayerId(layerId);
             List<String> coordinateTemplate = new ArrayList<>(geoObject.getCoordinates().size());
 
-            List<Object> listObjects = new ArrayList<>(6 + (geoObject.getCoordinates().size() * 2));
-            listObjects.addAll(Arrays.asList(geoObject.getLayerId(), geoObject.getName(), geoObject.getType(), geoObject.getDescription(), geoObject.getStrJson()));
+            List<Object> listObjects = new ArrayList<>(7 + (geoObject.getCoordinates().size() * 2));
+            listObjects.addAll(Arrays.asList(geoObject.getLayerId(), geoObject.getName(), geoObject.getType(), geoObject.getForwardArrowDirection(), geoObject.getDescription(), geoObject.getStrJson()));
 
             for (CoordinateDTO coordinate : geoObject.getCoordinates()) {
                 listObjects.add(coordinate.getLatitude());
@@ -149,8 +149,8 @@ public class GeoObjectDAO {
             }
 
             final String inParamsCoordinate = "ARRAY[ " + String.join(", ", coordinateTemplate) + " ]";
-            final String sql = "INSERT INTO geo_object(layer_id, name, type, description, json_data, coordinate)\n"
-                            +  "VALUES(?, ?, ?::geo_obj_type, ?, ?, " + inParamsCoordinate + ")";
+            final String sql = "INSERT INTO geo_object(layer_id, name, type, forward_arrow_direction, description, json_data, coordinate)\n"
+                            +  "VALUES(?, ?, ?::geo_obj_type, ?, ?, ?, " + inParamsCoordinate + ")";
 
             return this.jdbcTemplate.update(sql, listObjects.toArray()) > 0;
         }
@@ -163,8 +163,8 @@ public class GeoObjectDAO {
             updatedGeoObject.setLayerId(layerId);
             List<String> coordinateTemplate = new ArrayList<>(updatedGeoObject.getCoordinates().size());
 
-            List<Object> listObjects = new ArrayList<>(4 + (updatedGeoObject.getCoordinates().size() * 2));
-            listObjects.addAll(Arrays.asList(updatedGeoObject.getName(), updatedGeoObject.getDescription(), updatedGeoObject.getStrJson()));
+            List<Object> listObjects = new ArrayList<>(6 + (updatedGeoObject.getCoordinates().size() * 2));
+            listObjects.addAll(Arrays.asList(updatedGeoObject.getName(), updatedGeoObject.getType(), updatedGeoObject.getForwardArrowDirection(), updatedGeoObject.getDescription(), updatedGeoObject.getStrJson()));
 
             for (CoordinateDTO coordinate : updatedGeoObject.getCoordinates()) {
                 listObjects.add(coordinate.getLatitude());
@@ -177,7 +177,7 @@ public class GeoObjectDAO {
             final String inParamsCoordinate = "ARRAY[ " + String.join(", ", coordinateTemplate) + " ]";
 
             String sql = "UPDATE geo_object\n"
-                        +"SET name=?, description=?, json_data=?, coordinate=" + inParamsCoordinate + "\n"
+                        +"SET name=?, type=?::geo_obj_type, forward_arrow_direction=?, description=?, json_data=?, coordinate=" + inParamsCoordinate + "\n"
                         +"WHERE id=?\n";
 
             return this.jdbcTemplate.update(sql, listObjects.toArray()) > 0;

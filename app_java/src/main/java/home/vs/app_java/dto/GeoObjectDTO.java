@@ -13,6 +13,7 @@ public class GeoObjectDTO implements Serializable {
     private UUID layerId;
     private String name;
     private String type;
+    private Boolean forwardArrowDirection;
     private List<CoordinateDTO> coordinates = new ArrayList<>();
     private String description;
     private String strJson;
@@ -47,6 +48,14 @@ public class GeoObjectDTO implements Serializable {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Boolean getForwardArrowDirection() {
+        return forwardArrowDirection;
+    }
+    
+    public void setForwardArrowDirection(Boolean forwardArrowDirection) {
+        this.forwardArrowDirection = forwardArrowDirection;
     }
 
     public List<CoordinateDTO> getCoordinates() {

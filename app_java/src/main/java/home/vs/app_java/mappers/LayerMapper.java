@@ -20,7 +20,6 @@ public class LayerMapper implements RowMapper<LayerDTO> {
         layer.setLayerGroupId(rs.getInt("layer_group_id"));
         layer.setTypeObj(rs.getString("type"));
         layer.setName(rs.getString("name"));
-        layer.setForwardArrowDirection(rs.getBoolean("forward_arrow_direction"));
         layer.setDescription(rs.getString("description"));
         layer.setStrJson(rs.getString("json_data"));
 
