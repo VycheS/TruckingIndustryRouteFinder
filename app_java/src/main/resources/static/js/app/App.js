@@ -27,9 +27,9 @@ class App {
         //менеджер слоёв
         this._layerManager = new LayerManager(this._map);
         //кнопки редактирования
-        this._editLayers = new EditLayerControl(this._buttonGeoObj);
+        this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
         //лист бокс для выбора режима карты
-        this._mapModes = new MapModesControl(this._map, this._editLayers);
+        this._mapModes = new MapModesControl(this._map, this._editInformationLayersControl);
         //легенда карты
         this._legendMap = new MapLegendControl(this._layerManager);
 
@@ -59,7 +59,7 @@ class App {
             switch (this._buttonGeoObj.getActiveTypeGeoObj()) {
                 case "point":
                     if (eType == 'mouseup') {
-                        let layer = this._layerManager.getLayer(this._editLayers.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
                         layer.add('point', e.get('coords'));
                     }
                     break;
@@ -74,7 +74,7 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
-                        let layer = this._layerManager.getLayer(this._editLayers.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
                         layer.add('arrow', tmpCoordinates, {}, options);
                         this._bufferCoordinates.length = 0;
                     }
@@ -90,7 +90,7 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
-                        let layer = this._layerManager.getLayer(this._editLayers.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
                         layer.add('line', tmpCoordinates, {}, options);
                         this._bufferCoordinates.length = 0;//обнуляем счётчик хранилища координат
                     }
@@ -106,7 +106,7 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
-                        let layer = this._layerManager.getLayer(this._editLayers.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
                         layer.add('line', tmpCoordinates, {}, options); 
                     }
                     break;
@@ -118,7 +118,7 @@ class App {
 
     createLayer(name, type) {
         if (this._layerManager.add(name, type)) {
-            this._editLayers.addItem(name, type);
+            this._editInformationLayersControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {
             // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
