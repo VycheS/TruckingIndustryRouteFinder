@@ -6,7 +6,7 @@ class App {
         let modalNewLayot = document.querySelector('#newLayot');
         modalNewLayot.addEventListener('submit', function (e) {
             e.preventDefault();
-            app.createLayer(this.name.value, this.type.value)
+            app.createLayer(this.name.value, this.type.value) // !!! Здесь вызов из main !!!
             location.hash = '#close';
         });
         // Создание карты.
