@@ -37,26 +37,26 @@ class MapModesControl {
             //включаем на карте режим перемещения
             this._map.behaviors.enable(['drag']);
             //снимаем галочку с режима редактирования
-            edit.deselect();
+            editInformation.deselect();
             //отключаем все галочки и блокируем кнопки
             this._editLayers.deselectAll();
         });
 
 
         //создаём элемент для включения режима редактирования карты
-        let edit = new ymaps.control.ListBoxItem({
+        let editInformation = new ymaps.control.ListBoxItem({
             data: {
-                content: 'Редактирование'
+                content: 'Редактирование информационных слоёв'
             },
             state: {
                 selected: false
             },
         });
 
-        edit.events.add('click', () => {
+        editInformation.events.add('click', () => {
             //это условие для того чтобы галочка не отключалась при повторном нажатии
-            if (edit.isSelected()) {
-                edit.deselect();
+            if (editInformation.isSelected()) {
+                editInformation.deselect();
             }
             //добавляем на карту кнопку "редактирования слоёв"
             this._map.controls.add(this._editLayers.returnListBox(), {
@@ -69,7 +69,7 @@ class MapModesControl {
             view.deselect();
         });
         
-        return [view, edit];
+        return [view, editInformation];
     }
 
     returnListBox() {
