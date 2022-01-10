@@ -5,7 +5,7 @@ class EditInformationLayersControl {
         this._newLayerItem = this._createNewLayerItem();//создаём кнопку по которой будем добавлять новые слои
         this._editInformationLayersControl = new ymaps.control.ListBox({
             data: {
-                content: 'Редактор слоёв'
+                content: 'Редактор информационных слоёв'
             },
             items: [this._newLayerItem]
         });
@@ -18,7 +18,7 @@ class EditInformationLayersControl {
     _createNewLayerItem() {
         let itemNewLayot = new ymaps.control.ListBoxItem({
             data: {
-                content: '<strong>+</strong> добавить слой',
+                content: '<strong>+</strong> добавить информационный слой',
                 type_action: 'add_layot'//при помощи этого дополнительного св-ва мы cможем его отличать от других элементов
             },
             state: {
