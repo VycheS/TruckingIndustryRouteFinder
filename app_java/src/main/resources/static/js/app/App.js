@@ -1,14 +1,5 @@
 class App {
     constructor() {
-        //закрываем всё на всякий случай
-        location.hash = '#close';
-        //добавление события к форме модального окна
-        let modalNewLayot = document.querySelector('#newLayot');
-        modalNewLayot.addEventListener('submit', function (e) {
-            e.preventDefault();
-            app.createLayer(this.name.value, this.type.value) // !!! Здесь вызов из main !!!
-            location.hash = '#close';
-        });
         // Создание карты.
         this._map = new ymaps.Map("map", {
             // Координаты центра карты: «широта, долгота».
@@ -26,10 +17,12 @@ class App {
         this._bufferCoordinates = this._buttonGeoObj.getBuffer();
         //менеджер слоёв
         this._layerManager = new LayerManager(this._map);
-        //кнопки редактирования
+        //лист бокс для создания и редактирования информационного слоя
         this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
+        //лист бокс для создания и редактирования грузоперевозочного слоя
+        this._editTruckingIndustryLayersControl = new EditTruckingIndustryLayersControl(this._buttonGeoObj);
         //лист бокс для выбора режима карты
-        this._mapModes = new MapModesControl(this._map, this._editInformationLayersControl);
+        this._mapModes = new MapModesControl(this._map, this._editInformationLayersControl, this._editTruckingIndustryLayersControl);
         //легенда карты
         this._legendMap = new MapLegendControl(this._layerManager);
 
@@ -115,10 +108,20 @@ class App {
 
         });
     }
-
+    // для привязки к модальному окну (создание нового информационного слоя)
     createLayer(name, type) {
         if (this._layerManager.add(name, type)) {
             this._editInformationLayersControl.addItem(name, type);
+            this._legendMap.addItem(name, type);
+        } else {
+            // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
+            alert(`Слой ${name} существует`);
+        }
+    }
+    // для привязки к модальному окну (создание нового грузоперевозочного слоя)
+    createTruckingIndustryLayer(name, type) {
+        if (this._layerManager.add(name, type)) {
+            this._editTruckingIndustryLayerControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {
             // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО

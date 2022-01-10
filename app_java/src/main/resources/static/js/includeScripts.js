@@ -39,6 +39,7 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
             [
                 'MapModesControl.js',
                 'EditInformationLayersControl.js',
+                'EditTruckingIndustryLayersControl.js',
                 'MapLegendControl.js'
             ]
         ))
