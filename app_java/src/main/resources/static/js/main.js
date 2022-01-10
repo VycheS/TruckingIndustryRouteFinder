@@ -1,7 +1,7 @@
 //для строгой проверки типов
 "use strict";
 
-let app = new App();
+var app = new App();
 
 
 
