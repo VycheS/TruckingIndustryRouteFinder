@@ -19,7 +19,7 @@
             <input id="ok" type="button" value="OK" disabled="true">
         </div>
     </div>
-    <!-- Модальное окно -->
+    <!-- Модальные окна создания слоёв -->
     <div id="openModal" class="modalDialog">
         <div>
             <a href="#close" title="Закрыть" class="close">X</a>
@@ -37,6 +37,31 @@
                         <option value="point">Точка</option>
                         <option value="line">Линия</option>
                         <option value="broken_line">Ломанная линия</option>
+                    </select>
+                </p>
+                <p>
+                    <input type="submit" value="Создать">
+                    <input type="reset" value="Очистить">
+                </p>
+            </form>
+        </div>
+    </div>
+    <div id="openModalTruckingIndustry" class="modalDialog">
+        <div>
+            <a href="#close" title="Закрыть" class="close">X</a>
+            <h3 style="line-height:0.1em">Создание пользовательского слоя</h3>
+            <hr style="line-height:0.1em">
+            <form id="newLayot" action="#">
+                <p>
+                    <label for="name">Имя:</label>
+                    <input id="name" style="width: 90%;" required pattern="^([A-Za-z]+|[А-Яа-яЁё\-]+)$" autocomplete="off"
+                        title="ввод только кириллицы либо латиницы">
+                </p>
+                <p>
+                    <label for="typeTruckingIndustry">Тип:</label>
+                    <select id="typeTruckingIndustry">
+                        <option value="store">склады/пункты доставки</option>
+                        <option value="truck">грузоперевозчики</option>
                     </select>
                 </p>
                 <p>
