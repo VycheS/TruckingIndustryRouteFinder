@@ -11,12 +11,14 @@ class App {
             //включение или отключение способов взаимодействия с картой
             behaviors: ['drag', 'scrollZoom']
         });
+        //база данных для сохранения
+        this._layerStorageCRUD = new LayerCRUD("/client/1/layer_group/1/layers");
         //кнопки выбора геообъектов;
         this._buttonGeoObj = new ManagerButtonsGeoObj();
         //буфер для хранения контролируемый кнопками выбора геообъекта
         this._bufferCoordinates = this._buttonGeoObj.getBuffer();
         //менеджер слоёв
-        this._layerManager = new LayerManager(this._map);
+        this._layerManager = new LayerManager(this._map, this._layerStorageCRUD);
         //лист бокс для создания и редактирования информационного слоя
         this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
         //лист бокс для создания и редактирования грузоперевозочного слоя
@@ -52,7 +54,7 @@ class App {
             switch (this._buttonGeoObj.getActiveTypeGeoObj()) {
                 case "point":
                     if (eType == 'mouseup') {
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
                         layer.add('point', e.get('coords'));
                     }
                     break;
@@ -67,7 +69,7 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
                         layer.add('arrow', tmpCoordinates, {}, options);
                         this._bufferCoordinates.length = 0;
                     }
@@ -83,7 +85,7 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
                         layer.add('line', tmpCoordinates, {}, options);
                         this._bufferCoordinates.length = 0;//обнуляем счётчик хранилища координат
                     }
@@ -99,7 +101,7 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());
+                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
                         layer.add('line', tmpCoordinates, {}, options); 
                     }
                     break;
