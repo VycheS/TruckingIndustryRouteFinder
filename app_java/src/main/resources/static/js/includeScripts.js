@@ -10,13 +10,22 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
     все компоненты API, а также когда будет готово DOM-дерево. */
     .then(script => ymaps.ready()
         .then(script => addScripts('./js/app/dto/extends/',['DTO.js']))
-        .then(script => addScripts('./js/app/dto/',
+        .then(script => addScripts('./js/app/dto/database_entities/',
             [
                 'CoordinateDTO.js',
                 'ClientDTO.js',
                 'GeoObjectDTO.js',
                 'LayerGroupDTO.js',
                 'LayerDTO.js'
+            ]
+        ))
+        .then(script => addScripts('./js/app/dto/business_entity/',
+            [
+                'PointingArrowDTO.js',
+                'GoodsDTO.js',
+                'RouteDTO.js',
+                'StoreDTO.js',
+                'TruckDTO.js'
             ]
         ))
         .then(script => addScripts('./js/app/restapi/extends/',['CRUD.js']))
@@ -43,15 +52,6 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
                 'MapLegendControl.js'
             ]
         ))
-        .then(script => addScripts('./js/app/service/',
-        [
-            'PointingArrow.js',
-            'Goods.js',
-            'Route.js',
-            'Store.js',
-            'Truck.js'
-        ]
-    ))
         //подключение главного класса
         .then(script => addScripts('./js/app/', ['App.js']))
         //подключение главного стартового скрипта
