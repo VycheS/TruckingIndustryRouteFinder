@@ -19,6 +19,7 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
                 'LayerDTO.js'
             ]
         ))
+        .then(script => addScripts('./js/app/dto/information_entity/',['InformationLayerDTO.js']))
         .then(script => addScripts('./js/app/dto/business_entity/',
             [
                 'PointingArrowDTO.js',
