@@ -1,8 +1,11 @@
+//import LayerGeoObj;
+
 class LayerManager {
-    constructor(map) {
+    constructor(map, layersStorage = {}) {
         this._map = map;
         //хранит все слои
-        this._layersStorage = {};
+        this._layersStorage = layersStorage;
+        this._mapLayerController = new LayerGeoObj(map);
     }
 
     add(name, type) {
@@ -10,7 +13,7 @@ class LayerManager {
             return false;
         } else {
             if ((typeof (name) == 'string') && (type == 'point' || type == 'line' || type == 'broken_line')) {
-                this._layersStorage[name] = new LayerGeoObj(this._map, name, type);
+                this._layersStorage[name] = new LayerGeoObj(this._map, name);
                 return true;
             } else {
                 console.log(new Error(`Нет возможности создать слой с такими параметрами (${name}, ${type})`));

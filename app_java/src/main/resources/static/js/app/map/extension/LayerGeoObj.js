@@ -2,15 +2,13 @@
 let moduleArrow = ymaps.modules.require(['geoObject.Arrow']);
 
 class LayerGeoObj {
-    constructor(map, name, type) {
+    constructor(map, name, geoObjStorage = new Array) {
         //карта с которой взаимодействуем
         this._map = map;
         //хранилище геообъектов
-        this._storage = new Array;
+        this._geoObjStorage = geoObjStorage;
         //имя слоя
         this._name = name;
-        //тип слоя
-        this._type = type;
     }
 
     add(typeGeoObj, coordinates, properties = {}, options = {}) {
@@ -23,10 +21,9 @@ class LayerGeoObj {
     //включаем отображение на карте
     on() {
         //для каждого элемента массива вызываем добавление на карту
-        this._storage
-            .forEach(obj => {
-                this._addToMap(obj.typeGeoObj, obj.coordinates, obj.properties, obj.options);
-            });
+        this._geoObjStorage.forEach(obj => {
+            this._addToMap(obj.typeGeoObj, obj.coordinates, obj.properties, obj.options);
+        });
     }
 
     //отключаем отображение на карте
@@ -45,52 +42,54 @@ class LayerGeoObj {
         }
     }
 
-    _addEvent(obj) {
-        obj.events
-            .add('contextmenu', e => {
-                //получаем хранилище объектов для последующей обработки в фукции
-                let storage = this._storage;
-                //тип открывающегося меню
-                let typeMenu;
-                //в зависимости от типа выбираем нужное окно
-                if (obj.geometry.getType() == 'Point') {
-                    typeMenu = 'menuPoint';
-                } else {
-                    typeMenu = 'menuLine';
-                }
-                //возвращаем в зависимости от типа
-                let menu = document.querySelector('#' + typeMenu);
-                //меняем координаты окна перед появлением
-                menu.style.left = e.get('pagePixels')[0] + 'px';
-                menu.style.top = e.get('pagePixels')[1] + 'px';
-                //открываем окно "настройки геообъекта"
-                location.hash = typeMenu;
-                //добавляем обработку события для окна добавления опции к объекту
-                menu.addEventListener('submit', function (e) {
-                    //отключаем перезагрузку страницы при нажатии на submit
-                    e.preventDefault();
-                    //у окна линии нет названия объекта
-                    if (obj.geometry.getType() == 'Point') {
-                        //меняем заголовок объекта
-                        obj.properties.set('iconCaption', this.iconText.value);
-                        storage[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
-                    }
-                    //меняем подсказку объекта
-                    obj.properties.set('hintContent', this.hintText.value);
-                    storage[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
-                    //меняем балун обЪекта
-                    obj.properties.set('balloonContent', this.balloonText.value);
-                    storage[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
-                    //закрываем после ввода
-                    location.hash = '#close';
-                }, { once: true });//TODO возможно он здесь и не нужен теперь
+    getGeoObjStorage() {
+        return this._geoObjStorage;
+    }
 
-            });
+    _addEvent(obj) {
+        obj.events.add('contextmenu', e => {
+            //тип открывающегося меню
+            let typeMenu;
+            //в зависимости от типа выбираем нужное окно
+            if (obj.geometry.getType() == 'Point') {
+                typeMenu = 'menuPoint';
+            } else {
+                typeMenu = 'menuLine';
+            }
+            //возвращаем в зависимости от типа
+            let menu = document.querySelector('#' + typeMenu);
+            //меняем координаты окна перед появлением
+            menu.style.left = e.get('pagePixels')[0] + 'px';
+            menu.style.top = e.get('pagePixels')[1] + 'px';
+            //открываем окно "настройки геообъекта"
+            location.hash = typeMenu;
+            //добавляем обработку события для окна добавления опции к объекту
+            menu.addEventListener('submit', function (e) {
+                //отключаем перезагрузку страницы при нажатии на submit
+                e.preventDefault();
+                //у окна линии нет названия объекта
+                if (obj.geometry.getType() == 'Point') {
+                    //меняем заголовок объекта
+                    obj.properties.set('iconCaption', this.iconText.value);
+                    this._geoObjStorage[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
+                }
+                //меняем подсказку объекта
+                obj.properties.set('hintContent', this.hintText.value);
+                this._geoObjStorage[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
+                //меняем балун обЪекта
+                obj.properties.set('balloonContent', this.balloonText.value);
+                this._geoObjStorage[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
+                //закрываем после ввода
+                location.hash = '#close';
+            }, { once: true });//TODO возможно он здесь и не нужен теперь
+
+        });
     }
 
     _addToStorage(typeGeoObj, coordinates, properties, options){
         //добавляем в хранилище объектов
-        this._storage.push({
+        // this._geoObjStorage.push(new GeoObjectDTO())//TODO раскоментировать и доделать!!!!
+        this._geoObjStorage.push({
             typeGeoObj: typeGeoObj,
             coordinates: coordinates,
             properties: properties,
@@ -106,7 +105,7 @@ class LayerGeoObj {
                 //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
                 obj.layerName = this._name;
                 //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
-                obj.indexId = this._storage.length - 1;
+                obj.indexId = this._geoObjStorage.length - 1;
                 //добавляем доп характеристики объекту
                 this._addEvent(obj);
                 //добавляем на карту
@@ -127,7 +126,7 @@ class LayerGeoObj {
             //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
             obj.layerName = this._name;
             //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
-            obj.indexId = this._storage.length - 1;
+            obj.indexId = this._geoObjStorage.length - 1;
             //добавляем доп характеристики объекту
             this._addEvent(obj);
             //добавляем на карту
