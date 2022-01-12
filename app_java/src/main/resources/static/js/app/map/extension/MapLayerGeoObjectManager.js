@@ -9,31 +9,20 @@ class MapLayerGeoObjectManager {
         this._layerDTO = null;
     }
     // добаление геообъекта на слой DTO и на карту
-    addGeoObject(typeGeoObj, coordinates, properties = {}, options = {}) {
-        if (['point', 'line', 'arrow', 'broken_line'].includes(typeGeoObj)) {
-            this._addToLayerDTO(typeGeoObj, coordinates, properties, options);
-            this._addToMap(typeGeoObj, coordinates, properties, options);
+    addGeoObject(geoObjectDTO) {
+        if (['point', 'line', 'arrow', 'broken_line'].includes(geoObjectDTO.type)) {
+            // добавляем геооъект в слой во внутренний массив геообъектов
+            this._layerDTO.arrGeoObjects.push(geoObjectDTO);
+            let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
+            this._addToMap(mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
         } else console.error('неизвестный тип геообъекта');
     }
-
     //включаем отображение на карте
     on() {
         //для каждого элемента массива вызываем добавление на карту
-        this._layerDTO.arrGeoObjects.forEach(obj => {
-            let strJson = obj.strJson
-            let jsonObj = JSON.parse(strJson); //преобразуем строковый JSON в объект JSON
-            let arrOfCoordinates = new Array;
-            //в зависимости от типа геобъекта преобразуем массив геобъектов в массив массивов или массив
-
-            if (obj.type == "point") {
-                arrOfCoordinates.push(obj.coordinate[0].latitude);
-                arrOfCoordinates.push(obj.coordinate[0].longitude);
-            } else {
-                obj.coordinate.forEach(coordinate => {
-                    arrOfCoordinates.push([coordinate.latitude, coordinate.longitude]);
-                });   
-            }
-            this._addToMap(obj.type, arrOfCoordinates, jsonObj.properties, jsonObj.options);
+        this._layerDTO.arrGeoObjects.forEach(geoObjectDTO => {
+            let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
+            this._addToMap(mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
         });
     }
 
@@ -53,7 +42,7 @@ class MapLayerGeoObjectManager {
         }
     }
     // применить DTO слоя к карте
-    applyLayerDTOtoMap() {
+    applyLayerDTOToMap() {
         this.off();
         this.on();
     }
@@ -99,6 +88,7 @@ class MapLayerGeoObjectManager {
                 if (obj.geometry.getType() == 'Point') {
                     //меняем заголовок объекта
                     obj.properties.set('iconCaption', this.iconText.value);
+                    //TODO придумать что нибудь в тех местах где подписано "так же в хранилище", так как он изменяет вложенный слой, а должен менять тот к которому принадлежит.
                     this._layerDTO.arrGeoObjects[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
                 }
                 //меняем подсказку объекта
@@ -113,27 +103,30 @@ class MapLayerGeoObjectManager {
 
         });
     }
-    // добавляем во внутреннее вкладываемае хранилище слоя LayerDTO
-    _addToLayerDTO(typeGeoObj, coordinates, properties, options){
-        let arrOfCoordinateDTO = new Array; //массив CoordinateDTO
-        //преобразуем массив массивов или просто массив, в массив объектов CoordinateDTO
-        if (typeGeoObj == "point") {
-            arrOfCoordinateDTO.push(new CoordinateDTO(coordinates[0], coordinates[1]));
+    //конвертирует с dto в mapGeoObj
+    _GeoObjDTOConvertToMapGeoObj(geoObjectDTO) {
+        let jsonObj = JSON.parse(geoObjectDTO.strJson); //преобразуем строковый JSON в объект JSON
+        //добавляем параметры
+        jsonObj.iconCaption = geoObjectDTO.name;
+        jsonObj.hintContent = geoObjectDTO.description;
+
+        let arrOfCoordinates = new Array;
+        //в зависимости от типа геобъекта преобразуем массив геобъектов в массив массивов или массив
+        if (geoObjectDTO.type == "point") {
+            arrOfCoordinates.push(geoObjectDTO.coordinate[0].latitude);
+            arrOfCoordinates.push(geoObjectDTO.coordinate[0].longitude);
         } else {
-            coordinates.forEach(item => {
-                arrOfCoordinateDTO.push(new CoordinateDTO(item[0], item[1]));
-            }); 
+            geoObjectDTO.coordinate.forEach(coordinate => {
+                arrOfCoordinates.push([coordinate.latitude, coordinate.longitude]);
+            });   
         }
-        //добавляем в хранилище объектов
-        this._layerDTO.arrGeoObjects.push(new GeoObjectDTO(
-            null, //id
-            null, //name
-            typeGeoObj, //type
-            null, //forwardArrowDirection
-            arrOfCoordinateDTO, //coordinate
-            null, //description
-            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
-        ));
+
+        return {
+            type: geoObjectDTO.type,
+            coordinate: arrOfCoordinates,
+            properties: jsonObj.properties,
+            options: jsonObj.options
+        };
     }
     // добавляем на карту вкладываемый геообъект
     _addToMap(typeGeoObj, coordinates, properties, options){

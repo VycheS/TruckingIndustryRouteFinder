@@ -48,6 +48,7 @@ class App {
             strokeWidth: 5,
             opacity: 0.5
         };
+        let properties = {};
         //обработка событий мыши
         this._map.events.add(['mousedown', 'mouseup'], e => {
             let eType = e.get('type');
@@ -55,7 +56,16 @@ class App {
                 case "point":
                     if (eType == 'mouseup') {
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject('point', e.get('coords'));
+                        layer.addGeoObject(new GeoObjectDTO(
+                            null, //id
+                            null, //name
+                            'point', //type
+                            null, //forwardArrowDirection
+                            [new CoordinateDTO(e.get('coords')[0], e.get('coords')[1])], //coordinate
+                            null, //description
+                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                        ));
+
                     }
                     break;
 
@@ -68,9 +78,17 @@ class App {
                         //создаём временный массив чтобы в последствии его передать
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
-                        this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
+                        this._bufferCoordinates.forEach(item => tmpCoordinates.push(new CoordinateDTO(item[0],item[1])));
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject('arrow', tmpCoordinates, {}, options);
+                        layer.addGeoObject(new GeoObjectDTO(
+                            null, //id
+                            null, //name
+                            'arrow', //type
+                            true, //forwardArrowDirection
+                            tmpCoordinates, //coordinate
+                            null, //description
+                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                        ));
                         this._bufferCoordinates.length = 0;
                     }
                     break;
@@ -84,9 +102,17 @@ class App {
                         //создаём временный массив чтобы в последствии его передать
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
-                        this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
+                        this._bufferCoordinates.forEach(item => tmpCoordinates.push(new CoordinateDTO(item[0],item[1])));
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject('line', tmpCoordinates, {}, options);
+                        layer.addGeoObject(new GeoObjectDTO(
+                            null, //id
+                            null, //name
+                            'line', //type
+                            null, //forwardArrowDirection
+                            tmpCoordinates, //coordinate
+                            null, //description
+                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                        ));
                         this._bufferCoordinates.length = 0;//обнуляем счётчик хранилища координат
                     }
                     break;
@@ -100,9 +126,17 @@ class App {
                         //создаём временный массив чтобы в последствии его передать
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
-                        this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
+                        this._bufferCoordinates.forEach(item => tmpCoordinates.push(new CoordinateDTO(item[0],item[1])));
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject('line', tmpCoordinates, {}, options); 
+                        layer.addGeoObject(new GeoObjectDTO(
+                            null, //id
+                            null, //name
+                            'line', //type
+                            null, //forwardArrowDirection
+                            tmpCoordinates, //coordinate
+                            null, //description
+                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                        ));
                     }
                     break;
             }
