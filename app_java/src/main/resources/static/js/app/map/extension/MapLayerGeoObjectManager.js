@@ -8,10 +8,10 @@ class MapLayerGeoObjectManager {
         //хранимый слой
         this._layerDTO = null;
     }
-
+    // добаление геообъекта на слой DTO и на карту
     addGeoObject(typeGeoObj, coordinates, properties = {}, options = {}) {
         if (['point', 'line', 'arrow', 'broken_line'].includes(typeGeoObj)) {
-            this._addToStorage(typeGeoObj, coordinates, properties, options);
+            this._addToLayerDTO(typeGeoObj, coordinates, properties, options);
             this._addToMap(typeGeoObj, coordinates, properties, options);
         } else console.error('неизвестный тип геообъекта');
     }
@@ -52,11 +52,12 @@ class MapLayerGeoObjectManager {
             this._map.geoObjects.remove(rmList.pop());
         }
     }
-
-    getGeoObjStorage() {
-        return this._layerDTO.arrGeoObjects;
+    // применить DTO слоя к карте
+    applyLayerDTOtoMap() {
+        this.off();
+        this.on();
     }
-
+    // вернуть DTO слоя
     getLayer() {
         if (this._layerDTO == null) {
             throw Error("NullPointerException");
@@ -64,7 +65,7 @@ class MapLayerGeoObjectManager {
             return this._layerDTO; 
         }
     }
-
+    // установить DTO слоя
     setLayer(layerDTO) {
         if (layerDTO == null) {
             throw Error("NullPointerException");
@@ -72,7 +73,7 @@ class MapLayerGeoObjectManager {
             this._layerDTO = layerDTO; 
         }
     }
-
+    // добавляем события к геообектам
     _addEvent(obj) {
         obj.events.add('contextmenu', e => {
             //тип открывающегося меню
@@ -112,8 +113,8 @@ class MapLayerGeoObjectManager {
 
         });
     }
-
-    _addToStorage(typeGeoObj, coordinates, properties, options){
+    // добавляем во внутреннее вкладываемае хранилище слоя LayerDTO
+    _addToLayerDTO(typeGeoObj, coordinates, properties, options){
         let arrOfCoordinateDTO = new Array; //массив CoordinateDTO
         //преобразуем массив массивов или просто массив, в массив объектов CoordinateDTO
         if (typeGeoObj == "point") {
@@ -134,7 +135,7 @@ class MapLayerGeoObjectManager {
             `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
         ));
     }
-
+    // добавляем на карту вкладываемый геообъект
     _addToMap(typeGeoObj, coordinates, properties, options){
         if (typeGeoObj == 'arrow') {//только так можно удобно обработать модуль стрелки
             //при помощи модуля стрелки создаём её на карте
