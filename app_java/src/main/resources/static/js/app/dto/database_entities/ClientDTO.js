@@ -1,5 +1,6 @@
 class ClientDTO extends DTO {
     constructor(id, surname, name, patronymic, password, email, numberphone, role, strJson) {
+        super();
         this.id = id;
         this.surname = surname;
         this.name = name;

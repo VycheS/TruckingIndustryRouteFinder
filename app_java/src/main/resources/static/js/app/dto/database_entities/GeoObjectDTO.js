@@ -1,5 +1,6 @@
 class GeoObjectDTO extends DTO {
     constructor(id, layerId, name, type, forwardArrowDirection, coordinate, description, strJson) {
+        super();
         this.id = id;
         this.layerId = layerId;
         this.name = name;

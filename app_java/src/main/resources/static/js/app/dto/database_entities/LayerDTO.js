@@ -1,5 +1,6 @@
 class LayerDTO extends DTO {
     constructor(id, layerGroupId, type, name, description, strJson) {
+        super();
         this.id = id;
         this.layerGroupId = layerGroupId;
         this.type = type;

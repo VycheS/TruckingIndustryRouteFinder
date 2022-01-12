@@ -1,5 +1,6 @@
 class CoordinateDTO extends DTO {
     constructor(latitude, longitude ) {
+        super();
         this.latitude = latitude; //широта
         this.longitude = longitude; //долгота
     }

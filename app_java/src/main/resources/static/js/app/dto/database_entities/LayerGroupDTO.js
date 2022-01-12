@@ -1,5 +1,6 @@
 class LayerGroupDTO extends DTO {
     constructor(id, name) {
+        super();
         this.id = id;
         this.name = name;
     }
