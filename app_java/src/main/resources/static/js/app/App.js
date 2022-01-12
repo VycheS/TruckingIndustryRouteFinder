@@ -11,15 +11,14 @@ class App {
             //включение или отключение способов взаимодействия с картой
             behaviors: ['drag', 'scrollZoom']
         });
-        this._layerStorageMap = new Map();
         //база данных для сохранения
-        this._layerDB = new LayerCRUD("/client/1/layer_group/1/layers");
+        this._layerDB = new LayerCRUD("/client/1/layer_group/1/layers");// пока тестовое
         //кнопки выбора геообъектов;
         this._buttonGeoObj = new ManagerButtonsGeoObj();
         //буфер для хранения контролируемый кнопками выбора геообъекта
         this._bufferCoordinates = this._buttonGeoObj.getBuffer();
         //менеджер слоёв
-        this._layerManager = new LayerManager(this._map, this._layerStorageCRUD);
+        this._layerManager = new LayerManager(this._map);
         //лист бокс для создания и редактирования информационного слоя
         this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
         //лист бокс для создания и редактирования грузоперевозочного слоя
