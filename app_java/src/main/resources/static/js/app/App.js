@@ -55,7 +55,7 @@ class App {
                 case "point":
                     if (eType == 'mouseup') {
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.add('point', e.get('coords'));
+                        layer.addGeoObject('point', e.get('coords'));
                     }
                     break;
 
@@ -70,7 +70,7 @@ class App {
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.add('arrow', tmpCoordinates, {}, options);
+                        layer.addGeoObject('arrow', tmpCoordinates, {}, options);
                         this._bufferCoordinates.length = 0;
                     }
                     break;
@@ -86,7 +86,7 @@ class App {
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.add('line', tmpCoordinates, {}, options);
+                        layer.addGeoObject('line', tmpCoordinates, {}, options);
                         this._bufferCoordinates.length = 0;//обнуляем счётчик хранилища координат
                     }
                     break;
@@ -102,7 +102,7 @@ class App {
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(item));
                         let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.add('line', tmpCoordinates, {}, options); 
+                        layer.addGeoObject('line', tmpCoordinates, {}, options); 
                     }
                     break;
             }
@@ -110,7 +110,8 @@ class App {
 
         });
     }
-    // для привязки к модальному окну (создание нового информационного слоя)
+    // ДЛЯ ПРИВЯЗКИ К МОДАЛЬНОМУ ОКНУ
+    // создание нового информационного слоя
     createLayer(name, type) {
         if (this._layerManager.add(name, type)) {
             this._editInformationLayersControl.addItem(name, type);
@@ -120,7 +121,7 @@ class App {
             alert(`Слой ${name} существует`);
         }
     }
-    // для привязки к модальному окну (создание нового грузоперевозочного слоя)
+    // создание нового грузоперевозочного слоя
     createTruckingIndustryLayer(name, type) {
         if (this._layerManager.add(name, type)) {
             this._editTruckingIndustryLayerControl.addItem(name, type);
@@ -129,33 +130,6 @@ class App {
             // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
             alert(`Слой ${name} существует`);
         }
-    }
-    //test
-    output() {
-        let it = this._map.geoObjects.getIterator();
-        let obj;
-        while ((obj = it.getNext()) != it.STOP_ITERATION) {
-            console.log(obj);
-        }
-    }
-
-    //это для тестирования, смысла пока не имеет
-    _sendToServer() {
-        let data = {
-            name: 'nn',
-            val: 'vv'
-        }
-
-        //отправление данных на сервер
-        fetch('test.php', { // файл-обработчик
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json', // отправляемые данные
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => alert('Сообщение отправлено'))
-            .catch(error => console.error(error))
     }
 
 }

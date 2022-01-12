@@ -2,19 +2,14 @@
 let moduleArrow = ymaps.modules.require(['geoObject.Arrow']);
 
 class MapLayerGeoObjectManager {
-    // constructor(map, name, geoObjStorage = new Array) {
         constructor(map) {
         //карта с которой взаимодействуем
         this._map = map;
-        //хранилище геообъектов
-        // this._layerDTO.arrGeoObjects = geoObjStorage;
         //хранимый слой
         this._layerDTO = null;
-        //имя слоя
-        // this._layerDTO.name = name;
     }
 
-    add(typeGeoObj, coordinates, properties = {}, options = {}) {
+    addGeoObject(typeGeoObj, coordinates, properties = {}, options = {}) {
         if (['point', 'line', 'arrow', 'broken_line'].includes(typeGeoObj)) {
             this._addToStorage(typeGeoObj, coordinates, properties, options);
             this._addToMap(typeGeoObj, coordinates, properties, options);
@@ -176,4 +171,5 @@ class MapLayerGeoObjectManager {
             this._map.geoObjects.add(obj)
         }
     }
+    //TODO реализовать методы, удаления геообъектов. А только есть методы добавления.
 }
