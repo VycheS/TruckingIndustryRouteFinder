@@ -1,16 +1,17 @@
 //для того чтобы модуль стрелки был перед использованием инициализирован
 let moduleArrow = ymaps.modules.require(['geoObject.Arrow']);
 
-class LayerGeoObj {
-    constructor(map, name, geoObjStorage = new Array) {
+class MapLayerGeoObjectManager {
+    // constructor(map, name, geoObjStorage = new Array) {
+        constructor(map) {
         //карта с которой взаимодействуем
         this._map = map;
         //хранилище геообъектов
-        this._geoObjStorage = geoObjStorage;
+        // this._layerDTO.arrGeoObjects = geoObjStorage;
         //хранимый слой
         this._layerDTO = null;
         //имя слоя
-        this._name = name;
+        // this._layerDTO.name = name;
     }
 
     add(typeGeoObj, coordinates, properties = {}, options = {}) {
@@ -23,7 +24,7 @@ class LayerGeoObj {
     //включаем отображение на карте
     on() {
         //для каждого элемента массива вызываем добавление на карту
-        this._geoObjStorage.forEach(obj => {
+        this._layerDTO.arrGeoObjects.forEach(obj => {
             let strJson = obj.strJson
             let jsonObj = JSON.parse(strJson); //преобразуем строковый JSON в объект JSON
             let arrOfCoordinates = new Array;
@@ -47,7 +48,7 @@ class LayerGeoObj {
         let obj; //объект временного хранения
         let rmList = new Array(); //собираем удаляемые элементы
         while ((obj = it.getNext()) != it.STOP_ITERATION) {
-            if (obj.layerName == this._name) {
+            if (obj.layerName == this._layerDTO.name) {
                 rmList.push(obj);
             }
         }
@@ -58,7 +59,7 @@ class LayerGeoObj {
     }
 
     getGeoObjStorage() {
-        return this._geoObjStorage;
+        return this._layerDTO.arrGeoObjects;
     }
 
     getLayer() {
@@ -102,14 +103,14 @@ class LayerGeoObj {
                 if (obj.geometry.getType() == 'Point') {
                     //меняем заголовок объекта
                     obj.properties.set('iconCaption', this.iconText.value);
-                    this._geoObjStorage[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
+                    this._layerDTO.arrGeoObjects[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
                 }
                 //меняем подсказку объекта
                 obj.properties.set('hintContent', this.hintText.value);
-                this._geoObjStorage[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
+                this._layerDTO.arrGeoObjects[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
                 //меняем балун обЪекта
                 obj.properties.set('balloonContent', this.balloonText.value);
-                this._geoObjStorage[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
+                this._layerDTO.arrGeoObjects[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
                 //закрываем после ввода
                 location.hash = '#close';
             }, { once: true });//TODO возможно он здесь и не нужен теперь
@@ -128,14 +129,14 @@ class LayerGeoObj {
             }); 
         }
         //добавляем в хранилище объектов
-        this._geoObjStorage.push(new GeoObjectDTO(
+        this._layerDTO.arrGeoObjects.push(new GeoObjectDTO(
             null, //id
             null, //name
             typeGeoObj, //type
             null, //forwardArrowDirection
             arrOfCoordinateDTO, //coordinate
             null, //description
-            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}` //strJson
+            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
         ));
     }
 
@@ -145,9 +146,9 @@ class LayerGeoObj {
             moduleArrow.spread(Arrow => {
                 let obj = new Arrow(coordinates, properties, options);
                 //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
-                obj.layerName = this._name;
+                obj.layerName = this._layerDTO.name;
                 //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
-                obj.indexId = this._geoObjStorage.length - 1;
+                obj.indexId = this._layerDTO.arrGeoObjects.length - 1;
                 //добавляем доп характеристики объекту
                 this._addEvent(obj);
                 //добавляем на карту
@@ -166,9 +167,9 @@ class LayerGeoObj {
                 obj = new ymaps.Polyline(coordinates, properties, options);
             }
             //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
-            obj.layerName = this._name;
+            obj.layerName = this._layerDTO.name;
             //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
-            obj.indexId = this._geoObjStorage.length - 1;
+            obj.indexId = this._layerDTO.arrGeoObjects.length - 1;
             //добавляем доп характеристики объекту
             this._addEvent(obj);
             //добавляем на карту
