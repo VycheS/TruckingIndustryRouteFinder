@@ -11,8 +11,9 @@ class App {
             //включение или отключение способов взаимодействия с картой
             behaviors: ['drag', 'scrollZoom']
         });
+        this._layerStorageMap = new Map();
         //база данных для сохранения
-        this._layerStorageCRUD = new LayerCRUD("/client/1/layer_group/1/layers");
+        this._layerDB = new LayerCRUD("/client/1/layer_group/1/layers");
         //кнопки выбора геообъектов;
         this._buttonGeoObj = new ManagerButtonsGeoObj();
         //буфер для хранения контролируемый кнопками выбора геообъекта
