@@ -22,7 +22,20 @@ class LayerGeoObj {
     on() {
         //для каждого элемента массива вызываем добавление на карту
         this._geoObjStorage.forEach(obj => {
-            this._addToMap(obj.typeGeoObj, obj.coordinates, obj.properties, obj.options);
+            let strJson = obj.strJson
+            let jsonObj = JSON.parse(strJson); //преобразуем строковый JSON в объект JSON
+            let arrOfCoordinates = new Array;
+            //в зависимости от типа геобъекта преобразуем массив геобъектов в массив массивов или массив
+
+            if (obj.type == "point") {
+                arrOfCoordinates.push(obj.coordinate[0].latitude);
+                arrOfCoordinates.push(obj.coordinate[0].longitude);
+            } else {
+                obj.coordinate.forEach(coordinate => {
+                    arrOfCoordinates.push([coordinate.latitude, coordinate.longitude]);
+                });   
+            }
+            this._addToMap(obj.type, arrOfCoordinates, jsonObj.properties, jsonObj.options);
         });
     }
 
@@ -87,14 +100,26 @@ class LayerGeoObj {
     }
 
     _addToStorage(typeGeoObj, coordinates, properties, options){
+        let arrOfCoordinateDTO = new Array; //массив CoordinateDTO
+        //преобразуем массив массивов или просто массив, в массив объектов CoordinateDTO
+        if (typeGeoObj == "point") {
+            arrOfCoordinateDTO.push(new CoordinateDTO(coordinates[0], coordinates[1]));
+        } else {
+            coordinates.forEach(item => {
+                arrOfCoordinateDTO.push(new CoordinateDTO(item[0], item[1]));
+            }); 
+        }
         //добавляем в хранилище объектов
-        // this._geoObjStorage.push(new GeoObjectDTO())//TODO раскоментировать и доделать!!!!
-        this._geoObjStorage.push({
-            typeGeoObj: typeGeoObj,
-            coordinates: coordinates,
-            properties: properties,
-            options: options
-        });
+        this._geoObjStorage.push(new GeoObjectDTO(
+            null, //id
+            null, //layerId
+            null, //name
+            typeGeoObj, //type
+            null, //forwardArrowDirection
+            arrOfCoordinateDTO, //coordinate
+            null, //description
+            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}` //strJson
+        ));
     }
 
     _addToMap(typeGeoObj, coordinates, properties, options){
