@@ -4,7 +4,7 @@ class GeoObjectCRUD extends CRUD {
     }
 
     create(geoObject) {
-        return super.create(geoObject.getAllStrJson());
+        return super.create(JSON.stringify(geoObject));
     }
 
     read(id) {
@@ -16,7 +16,7 @@ class GeoObjectCRUD extends CRUD {
     }
 
     update(id, geoObject) {
-        return super.update(id, geoObject.getAllStrJson());
+        return super.update(id, JSON.stringify(geoObject));
     }
 
     delete(id) {

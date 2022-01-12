@@ -9,8 +9,7 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
     /* Функция ymaps.ready() будет вызвана, когда загрузятся 
     все компоненты API, а также когда будет готово DOM-дерево. */
     .then(script => ymaps.ready()
-        .then(script => addScripts('./js/app/dto/extends/',['DTO.js']))
-        .then(script => addScripts('./js/app/dto/database_entities/',
+        .then(script => addScripts('./js/app/dto/nested_database_entities/',
             [
                 'CoordinateDTO.js',
                 'ClientDTO.js',
@@ -19,7 +18,6 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
                 'LayerDTO.js'
             ]
         ))
-        .then(script => addScripts('./js/app/dto/information_entity/',['InformationLayerDTO.js']))
         .then(script => addScripts('./js/app/dto/business_entity/',
             [
                 'PointingArrowDTO.js',

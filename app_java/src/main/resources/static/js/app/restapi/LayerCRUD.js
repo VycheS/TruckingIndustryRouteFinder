@@ -4,7 +4,7 @@ class LayerCRUD extends CRUD {
     }
 
     create(layer) {
-        return super.create(layer.getAllStrJson());
+        return super.create(JSON.stringify(layer));
     }
 
     read(id) {
@@ -16,7 +16,7 @@ class LayerCRUD extends CRUD {
     }
 
     update(id, layer) {
-        return super.update(id, layer.getAllStrJson());
+        return super.update(id, JSON.stringify(layer));
     }
 
     delete(id) {

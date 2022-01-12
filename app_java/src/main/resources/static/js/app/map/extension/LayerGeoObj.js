@@ -7,6 +7,8 @@ class LayerGeoObj {
         this._map = map;
         //хранилище геообъектов
         this._geoObjStorage = geoObjStorage;
+        //хранимый слой
+        this._layerDTO = null;
         //имя слоя
         this._name = name;
     }
@@ -57,6 +59,22 @@ class LayerGeoObj {
 
     getGeoObjStorage() {
         return this._geoObjStorage;
+    }
+
+    getLayer() {
+        if (this._layerDTO == null) {
+            throw Error("NullPointerException");
+        } else {
+            return this._layerDTO; 
+        }
+    }
+
+    setLayer(layerDTO) {
+        if (layerDTO == null) {
+            throw Error("NullPointerException");
+        } else {
+            this._layerDTO = layerDTO; 
+        }
     }
 
     _addEvent(obj) {
@@ -112,7 +130,6 @@ class LayerGeoObj {
         //добавляем в хранилище объектов
         this._geoObjStorage.push(new GeoObjectDTO(
             null, //id
-            null, //layerId
             null, //name
             typeGeoObj, //type
             null, //forwardArrowDirection

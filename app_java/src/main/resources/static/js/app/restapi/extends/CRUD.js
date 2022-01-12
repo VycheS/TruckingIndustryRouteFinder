@@ -35,8 +35,6 @@ class CRUD {
                 throw new Error(`HTTP error! status: ${response.status}`);
             } else {
                 return response;
-                // return await response.json(); //extract JSON from the http response
-                //TODO подумать может просто responce возвращать!!!
             }
         
     }

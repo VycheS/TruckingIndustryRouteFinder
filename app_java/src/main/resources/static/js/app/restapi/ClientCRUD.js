@@ -4,7 +4,7 @@ class ClientCRUD extends CRUD {
     }
 
     create(client) {
-        return super.create(client.getAllStrJson());
+        return super.create(JSON.stringify(client));
     }
 
     read(id) {
@@ -16,7 +16,7 @@ class ClientCRUD extends CRUD {
     }
 
     update(id, client) {
-        return super.update(id, client.getStrJson());
+        return super.update(id, JSON.stringify(client));
     }
 
     delete(id) {
