@@ -17,8 +17,10 @@ class App {
         this._buttonGeoObj = new ManagerButtonsGeoObj();
         //буфер для хранения контролируемый кнопками выбора геообъекта
         this._bufferCoordinates = this._buttonGeoObj.getBuffer();
-        //менеджер слоёв
-        this._layerManager = new LayerManager(this._map);
+        //хранилище слоёв типа данных коллекции Map
+        this._layerStorage = new Map();
+        //менеджер слоёв и их геообъектов
+        this._mapLayerGeoObjectManager = new MapLayerGeoObjectManager(this._map, this._layerStorage);
         //лист бокс для создания и редактирования информационного слоя
         this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
         //лист бокс для создания и редактирования грузоперевозочного слоя
@@ -26,7 +28,7 @@ class App {
         //лист бокс для выбора режима карты
         this._mapModes = new MapModesControl(this._map, this._editInformationLayersControl, this._editTruckingIndustryLayersControl);
         //легенда карты
-        this._legendMap = new MapLegendControl(this._layerManager);
+        this._legendMap = new MapLegendControl(this._mapLayerGeoObjectManager);
 
         //добавление списков на карту
         this._map.controls.add(this._legendMap.returnListBox(), {
@@ -55,8 +57,8 @@ class App {
             switch (this._buttonGeoObj.getActiveTypeGeoObj()) {
                 case "point":
                     if (eType == 'mouseup') {
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject(new GeoObjectDTO(
+                        //TODO добавить сюда editTruckingIndustryLayerControl
+                        this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
                             null, //id
                             null, //name
                             'point', //type
@@ -79,8 +81,8 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(new CoordinateDTO(item[0],item[1])));
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject(new GeoObjectDTO(
+                        //TODO добавить сюда editTruckingIndustryLayerControl
+                        this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
                             null, //id
                             null, //name
                             'arrow', //type
@@ -103,8 +105,8 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(new CoordinateDTO(item[0],item[1])));
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject(new GeoObjectDTO(
+                        //TODO добавить сюда editTruckingIndustryLayerControl
+                        this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
                             null, //id
                             null, //name
                             'line', //type
@@ -127,8 +129,8 @@ class App {
                         let tmpCoordinates = new Array;
                         //складываем в него элементы чтобы передать копию
                         this._bufferCoordinates.forEach(item => tmpCoordinates.push(new CoordinateDTO(item[0],item[1])));
-                        let layer = this._layerManager.getLayer(this._editInformationLayersControl.getSelectedLayer());//TODO добавить сюда editTruckingIndustryLayerControl
-                        layer.addGeoObject(new GeoObjectDTO(
+                        //TODO добавить сюда editTruckingIndustryLayerControl
+                        this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
                             null, //id
                             null, //name
                             'line', //type
@@ -147,7 +149,8 @@ class App {
     // ДЛЯ ПРИВЯЗКИ К МОДАЛЬНОМУ ОКНУ
     // создание нового информационного слоя
     createLayer(name, type) {
-        if (this._layerManager.add(name, type)) {
+        if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(name)) {
+            this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(null, type, name, null, null, new Array));
             this._editInformationLayersControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {
@@ -157,7 +160,8 @@ class App {
     }
     // создание нового грузоперевозочного слоя
     createTruckingIndustryLayer(name, type) {
-        if (this._layerManager.add(name, type)) {
+        if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(name)) {
+            this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(null, type, name, null, null, new Array));
             this._editTruckingIndustryLayerControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {

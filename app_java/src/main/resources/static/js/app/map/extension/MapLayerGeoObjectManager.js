@@ -2,37 +2,47 @@
 let moduleArrow = ymaps.modules.require(['geoObject.Arrow']);
 
 class MapLayerGeoObjectManager {
-        constructor(map) {
+        constructor(map, layerStorage) {
         //карта с которой взаимодействуем
         this._map = map;
-        //хранимый слой
-        this._layerDTO = null;
+        // коллекция типа Map. Хранит в себе все слои.
+        this._layerStorage = layerStorage;
     }
     // добаление геообъекта на слой DTO и на карту
-    addGeoObject(geoObjectDTO) {
+    addGeoObject(layerName, geoObjectDTO) {
+        let checkedLayerName = this._layerExist(layerName);
         if (['point', 'line', 'arrow', 'broken_line'].includes(geoObjectDTO.type)) {
             // добавляем геооъект в слой во внутренний массив геообъектов
-            this._layerDTO.arrGeoObjects.push(geoObjectDTO);
+            this._layerStorage.get(checkedLayerName).arrGeoObjects.push(geoObjectDTO);
             let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
-            this._addToMap(mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
-        } else console.error('неизвестный тип геообъекта');
+            this._addToMap(checkedLayerName, mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
+        } else throw Error('неизвестный тип геообъекта');
+    }
+    addNewLayer(layerDTO) {
+        let checkedLayerName = this._layerNotExist(layerDTO.name);
+        if (['point', 'line', 'arrow', 'broken_line'].includes(layerDTO.type)) {
+            // добавляем новый слой
+            this._layerStorage.set(checkedLayerName, layerDTO);
+        } else throw Error('неизвестный тип слоя');
     }
     //включаем отображение на карте
-    on() {
+    on(layerName) {
+        let checkedLayerName = this._layerExist(layerName);
         //для каждого элемента массива вызываем добавление на карту
-        this._layerDTO.arrGeoObjects.forEach(geoObjectDTO => {
+        this._layerStorage.get(checkedLayerName).arrGeoObjects.forEach(geoObjectDTO => {
             let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
-            this._addToMap(mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
+            this._addToMap(checkedLayerName, mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
         });
     }
 
     //отключаем отображение на карте
-    off() {
+    off(layerName) {
+        let checkedLayerName = this._layerExist(layerName);
         let it = this._map.geoObjects.getIterator();//возвращаем итератор объектов
         let obj; //объект временного хранения
         let rmList = new Array(); //собираем удаляемые элементы
         while ((obj = it.getNext()) != it.STOP_ITERATION) {
-            if (obj.layerName == this._layerDTO.name) {
+            if (obj.layerName == this._layerStorage.get(checkedLayerName).name) {
                 rmList.push(obj);
             }
         }
@@ -42,25 +52,9 @@ class MapLayerGeoObjectManager {
         }
     }
     // применить DTO слоя к карте
-    applyLayerDTOToMap() {
-        this.off();
-        this.on();
-    }
-    // вернуть DTO слоя
-    getLayer() {
-        if (this._layerDTO == null) {
-            throw Error("NullPointerException");
-        } else {
-            return this._layerDTO; 
-        }
-    }
-    // установить DTO слоя
-    setLayer(layerDTO) {
-        if (layerDTO == null) {
-            throw Error("NullPointerException");
-        } else {
-            this._layerDTO = layerDTO; 
-        }
+    applyLayerDTOToMap(layerName) {
+        this.off(layerName);
+        this.on(layerName);
     }
     // добавляем события к геообектам
     _addEvent(obj) {
@@ -88,15 +82,15 @@ class MapLayerGeoObjectManager {
                 if (obj.geometry.getType() == 'Point') {
                     //меняем заголовок объекта
                     obj.properties.set('iconCaption', this.iconText.value);
-                    //TODO придумать что нибудь в тех местах где подписано "так же в хранилище", так как он изменяет вложенный слой, а должен менять тот к которому принадлежит.
-                    this._layerDTO.arrGeoObjects[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
+                    //TODO придумать что бы нормально сохранял в strJson.
+                    this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
                 }
                 //меняем подсказку объекта
                 obj.properties.set('hintContent', this.hintText.value);
-                this._layerDTO.arrGeoObjects[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
+                this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
                 //меняем балун обЪекта
                 obj.properties.set('balloonContent', this.balloonText.value);
-                this._layerDTO.arrGeoObjects[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
+                this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
                 //закрываем после ввода
                 location.hash = '#close';
             }, { once: true });//TODO возможно он здесь и не нужен теперь
@@ -129,15 +123,15 @@ class MapLayerGeoObjectManager {
         };
     }
     // добавляем на карту вкладываемый геообъект
-    _addToMap(typeGeoObj, coordinates, properties, options){
+    _addToMap(layerName, typeGeoObj, coordinates, properties, options){
         if (typeGeoObj == 'arrow') {//только так можно удобно обработать модуль стрелки
             //при помощи модуля стрелки создаём её на карте
             moduleArrow.spread(Arrow => {
                 let obj = new Arrow(coordinates, properties, options);
                 //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
-                obj.layerName = this._layerDTO.name;
+                obj.layerName = layerName;
                 //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
-                obj.indexId = this._layerDTO.arrGeoObjects.length - 1;
+                obj.indexId = this._layerStorage.get(layerName).arrGeoObjects.length - 1;
                 //добавляем доп характеристики объекту
                 this._addEvent(obj);
                 //добавляем на карту
@@ -156,13 +150,37 @@ class MapLayerGeoObjectManager {
                 obj = new ymaps.Polyline(coordinates, properties, options);
             }
             //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
-            obj.layerName = this._layerDTO.name;
+            obj.layerName = layerName;
             //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
-            obj.indexId = this._layerDTO.arrGeoObjects.length - 1;
+            obj.indexId = this._layerStorage.get(layerName).arrGeoObjects.length - 1;
             //добавляем доп характеристики объекту
             this._addEvent(obj);
             //добавляем на карту
             this._map.geoObjects.add(obj)
+        }
+    }
+    // проверка на существование слоя по имени
+    _layerExist(layerName) {
+        if (this.booleanExistenceCheck(layerName)) {
+            return layerName;
+        } else {
+            throw Error(`Слоя с таким именем как:\"${layerName}\", не существует!!!`);
+        }
+    }
+    // проверка на не существование слоя по имени
+    _layerNotExist(layerName) {
+        if (this.booleanExistenceCheck(layerName)) {
+            throw Error(`Слой с таким именем как:\"${layerName}\", существует!!!`);
+        } else {
+            return layerName;
+        }
+    }
+    // проверка на существование слоя по имени с возвращением булевого типа данных
+    booleanExistenceCheck(layerName) {
+        if (this._layerStorage.has(layerName)) {
+            return true;
+        } else {
+            return false;
         }
     }
     //TODO реализовать методы, удаления геообъектов. А только есть методы добавления.
