@@ -10,14 +10,16 @@ let modalNewInformationLayot = document.querySelector('#newInformationLayot');
 modalNewInformationLayot.addEventListener('submit', function (e) {
     e.preventDefault();
     app.createLayer(this.name.value, this.type.value)
-    location.hash = '#close';
+    location.hash = '#close';//закрываем
+    modalNewInformationLayot.reset();//очищаем после ввода
 });
 
 let modalNewTruckingIndustryLayot = document.querySelector('#newTruckingIndustryLayot');
 modalNewTruckingIndustryLayot.addEventListener('submit', function (e) {
     e.preventDefault();
     app.createTruckingIndustryLayer(this.name.value, this.type.value)
-    location.hash = '#close';
+    location.hash = '#close';//закрываем
+    modalNewTruckingIndustryLayot.reset();//очищаем после ввода
 });
 
 
