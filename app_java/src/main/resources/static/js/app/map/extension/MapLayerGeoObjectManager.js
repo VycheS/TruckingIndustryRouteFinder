@@ -3,6 +3,8 @@ let moduleArrow = ymaps.modules.require(['geoObject.Arrow']);
 
 class MapLayerGeoObjectManager {
         constructor(map, layerStorage) {
+        //типы слоёв которые проходят проверку
+        this._typesToCheck = ['point', 'line', 'arrow', 'broken_line'];
         //карта с которой взаимодействуем
         this._map = map;
         // коллекция типа Map. Хранит в себе все слои.
@@ -11,7 +13,7 @@ class MapLayerGeoObjectManager {
     // добаление геообъекта на слой DTO и на карту
     addGeoObject(layerName, geoObjectDTO) {
         let checkedLayerName = this._layerExist(layerName);
-        if (['point', 'line', 'arrow', 'broken_line'].includes(geoObjectDTO.type)) {
+        if (this._typesToCheck.includes(geoObjectDTO.type)) {
             // добавляем геооъект в слой во внутренний массив геообъектов
             this._layerStorage.get(checkedLayerName).arrGeoObjects.push(geoObjectDTO);
             let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
@@ -20,7 +22,7 @@ class MapLayerGeoObjectManager {
     }
     addNewLayer(layerDTO) {
         let checkedLayerName = this._layerNotExist(layerDTO.name);
-        if (['point', 'line', 'arrow', 'broken_line'].includes(layerDTO.type)) {
+        if (this._typesToCheck.includes(layerDTO.type)) {
             // добавляем новый слой
             this._layerStorage.set(checkedLayerName, layerDTO);
         } else throw Error('неизвестный тип слоя');
@@ -75,22 +77,28 @@ class MapLayerGeoObjectManager {
             //открываем окно "настройки геообъекта"
             location.hash = typeMenu;
             //добавляем обработку события для окна добавления опции к объекту
-            menu.addEventListener('submit', function (e) {
+            menu.addEventListener('submit',  e => {
+                //забираем временно из объекта хранилилища, параметры геообъекта карты преобразовавывая strJson в objJson
+                let objJson = JSON.parse(this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].strJson);
                 //отключаем перезагрузку страницы при нажатии на submit
                 e.preventDefault();
                 //у окна линии нет названия объекта
                 if (obj.geometry.getType() == 'Point') {
                     //меняем заголовок объекта
-                    obj.properties.set('iconCaption', this.iconText.value);
-                    //TODO придумать что бы нормально сохранял в strJson.
-                    this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].properties['iconCaption'] = this.iconText.value;//также в хранилище
+                    obj.properties.set('iconCaption', menu.iconText.value);
+                    this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].name = menu.iconText.value; //в том числе и имя в geoObjDTO
+                    objJson.properties.iconCaption = menu.iconText.value;
                 }
                 //меняем подсказку объекта
-                obj.properties.set('hintContent', this.hintText.value);
-                this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].properties['hintContent'] = this.hintText.value;//также в хранилище
-                //меняем балун обЪекта
-                obj.properties.set('balloonContent', this.balloonText.value);
-                this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].properties['balloonContent'] = this.balloonText.value;//также в хранилище
+                obj.properties.set('hintContent', menu.hintText.value);
+                objJson.properties.hintContent = menu.hintText.value;
+                //меняем балун объекта
+                obj.properties.set('balloonContent', menu.balloonText.value);
+                objJson.properties.balloonContent = menu.balloonText.value;
+                //возвращаем обратно в объект в хранилилище, изменения параметров геообъекта карты преобразовывая objJson обратно в strJson
+                this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].strJson = JSON.stringify(objJson);
+                //очищаем все поля ввода после применить
+                menu.reset();
                 //закрываем после ввода
                 location.hash = '#close';
             }, { once: true });//TODO возможно он здесь и не нужен теперь
@@ -101,9 +109,8 @@ class MapLayerGeoObjectManager {
     _GeoObjDTOConvertToMapGeoObj(geoObjectDTO) {
         let jsonObj = JSON.parse(geoObjectDTO.strJson); //преобразуем строковый JSON в объект JSON
         //добавляем параметры
-        jsonObj.iconCaption = geoObjectDTO.name;
-        jsonObj.hintContent = geoObjectDTO.description;
-
+        jsonObj.properties.iconCaption = geoObjectDTO.name;
+        jsonObj.properties.hintContent = geoObjectDTO.description;
         let arrOfCoordinates = new Array;
         //в зависимости от типа геобъекта преобразуем массив геобъектов в массив массивов или массив
         if (geoObjectDTO.type == "point") {
@@ -138,7 +145,6 @@ class MapLayerGeoObjectManager {
                 this._map.geoObjects.add(obj);
                 
             });
-
         } else {
 
             let obj;

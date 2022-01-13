@@ -57,16 +57,23 @@ class App {
             switch (this._buttonGeoObj.getActiveTypeGeoObj()) {
                 case "point":
                     if (eType == 'mouseup') {
+                        
                         //TODO добавить сюда editTruckingIndustryLayerControl
-                        this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
-                            null, //id
-                            null, //name
-                            'point', //type
-                            null, //forwardArrowDirection
-                            [new CoordinateDTO(e.get('coords')[0], e.get('coords')[1])], //coordinate
-                            null, //description
-                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
-                        ));
+                        if (this._editInformationLayersControl.getSelectedLayer() != undefined) {
+                            this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
+                                null, //id
+                                null, //name
+                                'point', //type
+                                null, //forwardArrowDirection
+                                [new CoordinateDTO(e.get('coords')[0], e.get('coords')[1])], //coordinate
+                                null, //description
+                                `{\"properties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                            ));  
+                        } else if(this._editTruckingIndustryLayersControl.getSelectedLayer() != undefined) {
+                            console.log(e.get('coords')); //для теста!!!
+                        } else {
+                            throw Error("Слой в контролах не выбран!!!")
+                        }
 
                     }
                     break;
@@ -89,7 +96,7 @@ class App {
                             true, //forwardArrowDirection
                             tmpCoordinates, //coordinate
                             null, //description
-                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                            `{\"properties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
                         ));
                         this._bufferCoordinates.length = 0;
                     }
@@ -113,7 +120,7 @@ class App {
                             null, //forwardArrowDirection
                             tmpCoordinates, //coordinate
                             null, //description
-                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                            `{\"properties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
                         ));
                         this._bufferCoordinates.length = 0;//обнуляем счётчик хранилища координат
                     }
@@ -137,7 +144,7 @@ class App {
                             null, //forwardArrowDirection
                             tmpCoordinates, //coordinate
                             null, //description
-                            `{\"proterties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
+                            `{\"properties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
                         ));
                     }
                     break;

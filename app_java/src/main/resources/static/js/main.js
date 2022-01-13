@@ -9,7 +9,7 @@ location.hash = '#close';
 let modalNewInformationLayot = document.querySelector('#newInformationLayot');
 modalNewInformationLayot.addEventListener('submit', function (e) {
     e.preventDefault();
-    app.createLayer(this.name.value, this.type.value)
+    app.createLayer(this.name.value, this.type.value);
     location.hash = '#close';//закрываем
     modalNewInformationLayot.reset();//очищаем после ввода
 });
@@ -17,7 +17,8 @@ modalNewInformationLayot.addEventListener('submit', function (e) {
 let modalNewTruckingIndustryLayot = document.querySelector('#newTruckingIndustryLayot');
 modalNewTruckingIndustryLayot.addEventListener('submit', function (e) {
     e.preventDefault();
-    app.createTruckingIndustryLayer(this.name.value, this.type.value)
+    console.log(this.name.value + " " + this.type.value);
+    app.createTruckingIndustryLayer(this.name.value, this.type.value);
     location.hash = '#close';//закрываем
     modalNewTruckingIndustryLayot.reset();//очищаем после ввода
 });
