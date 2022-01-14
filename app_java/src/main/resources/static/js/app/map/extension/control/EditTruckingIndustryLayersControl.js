@@ -9,6 +9,7 @@ class EditTruckingIndustryLayersControl {
             },
             items: [this._newLayerItem]
         });
+        this._selectedTypeGeoObj = undefined; //выбранный тип геообъектов
     }
 
     returnListBox(){
@@ -56,6 +57,8 @@ class EditTruckingIndustryLayersControl {
             this.selectedLayer = selectedItem.data.get('content');
             //выставляем кнопки в зависимости от типа слоя
             this.buttonsGeoObj.setTypeLayer(selectedItem.data.get('type_layer'));
+            //выставляем в зависимости от типа геообъектов
+            this._selectedTypeGeoObj = selectedItem.data.get('type_geoobj');
         }
 
     }
@@ -76,11 +79,14 @@ class EditTruckingIndustryLayersControl {
         this.buttonsGeoObj.setTypeLayer(undefined);
     }
 
-    addItem(name, type) {
+    addItem(name, type_geoobj) {
+        let type_layer = this.getConvertToStandartType(type_geoobj);
         let newItem = new ymaps.control.ListBoxItem({
             data: {
                 content: name,
-                type_layer: type//для удобства добавляем собственное св-во, по которому будет знать тип слоя
+                //для удобства добавляем собственное св-во, по которому будет знать тип слоя и тип геообъетов
+                type_layer: type_layer,
+                type_geoobj: type_geoobj
             },
             state: {
                 selected: false
@@ -108,8 +114,20 @@ class EditTruckingIndustryLayersControl {
         newItem.select();
     }
 
+    getConvertToStandartType(type) {
+        if (['deliveryPoint', 'truck', 'goods', ].includes(type)) {
+            return 'point';
+        } else if (['pointingArrow', 'route'].includes(type)) {
+            return 'line'
+        } else throw Error(`Такого типа геообъектов:\"${type}\" для грузоперевозок, не существует`);
+    }
+
     //возвращаем выбранный слой
     getSelectedLayer() {
         return this.selectedLayer;
+    }
+    //возвращаем тип геообъектов
+    getSelectedTypeGeoObj() {
+        return this._selectedTypeGeoObj;
     }
 }

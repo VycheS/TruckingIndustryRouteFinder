@@ -21,6 +21,8 @@ class App {
         this._layerStorage = new Map();
         //менеджер слоёв и их геообъектов
         this._mapLayerGeoObjectManager = new MapLayerGeoObjectManager(this._map, this._layerStorage);
+        //менеджер грузоперевозочных слоёв унаследованный от менеджера слоёв
+        this._mapTruckingIndustryManager = new MapTruckingIndustryManager(this._map, this._layerStorage);
         //лист бокс для создания и редактирования информационного слоя
         this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
         //лист бокс для создания и редактирования грузоперевозочного слоя
@@ -28,7 +30,7 @@ class App {
         //лист бокс для выбора режима карты
         this._mapModes = new MapModesControl(this._map, this._editInformationLayersControl, this._editTruckingIndustryLayersControl);
         //легенда карты
-        this._legendMap = new MapLegendControl(this._mapLayerGeoObjectManager);
+        this._legendMap = new MapLegendControl(this._mapLayerGeoObjectManager, this._mapTruckingIndustryManager);
 
         //добавление списков на карту
         this._map.controls.add(this._legendMap.returnListBox(), {
@@ -70,7 +72,16 @@ class App {
                                 `{\"properties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}}`//strJson
                             ));  
                         } else if(this._editTruckingIndustryLayersControl.getSelectedLayer() != undefined) {
-                            console.log(e.get('coords')); //для теста!!!
+                            let objTruckingIndustry = {type: this._editTruckingIndustryLayersControl.getSelectedTypeGeoObj()}
+                            this._mapTruckingIndustryManager.addGeoObject(this._editTruckingIndustryLayersControl.getSelectedLayer(), new GeoObjectDTO(
+                                null, //id
+                                null, //name
+                                'point', //type
+                                null, //forwardArrowDirection
+                                [new CoordinateDTO(e.get('coords')[0], e.get('coords')[1])], //coordinate
+                                null, //description
+                                `{\"properties\":${JSON.stringify(properties)},\"options\":${JSON.stringify(options)}, \"trucking_industry\":${JSON.stringify(objTruckingIndustry)}}`//strJson
+                            ));  
                         } else {
                             throw Error("Слой в контролах не выбран!!!")
                         }
@@ -167,9 +178,10 @@ class App {
     }
     // создание нового грузоперевозочного слоя
     createTruckingIndustryLayer(name, type) {
-        if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(name)) {
-            this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(null, type, name, null, null, new Array));
-            this._editTruckingIndustryLayerControl.addItem(name, type);
+        if (!this._mapTruckingIndustryManager.booleanExistenceCheck(name)) {
+            //не забываем конвертировать тип слоя, чтобы он конкретно работал с менеджером слоёв
+            this._mapTruckingIndustryManager.addNewLayer(new LayerDTO(null, this._editTruckingIndustryLayersControl.getConvertToStandartType(type), name, null, null, new Array));
+            this._editTruckingIndustryLayersControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {
             // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО

@@ -2,9 +2,9 @@
 let moduleArrow = ymaps.modules.require(['geoObject.Arrow']);
 
 class MapLayerGeoObjectManager {
-        constructor(map, layerStorage) {
+        constructor(map, layerStorage, typesToCheck = ['point', 'line', 'arrow', 'broken_line']) {
         //типы слоёв которые проходят проверку
-        this._typesToCheck = ['point', 'line', 'arrow', 'broken_line'];
+        this._typesToCheck = typesToCheck;
         //карта с которой взаимодействуем
         this._map = map;
         // коллекция типа Map. Хранит в себе все слои.
@@ -16,16 +16,16 @@ class MapLayerGeoObjectManager {
         if (this._typesToCheck.includes(geoObjectDTO.type)) {
             // добавляем геооъект в слой во внутренний массив геообъектов
             this._layerStorage.get(checkedLayerName).arrGeoObjects.push(geoObjectDTO);
-            let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
-            this._addToMap(checkedLayerName, mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
-        } else throw Error('неизвестный тип геообъекта');
+            let convertedDto = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
+            this._addToMap(checkedLayerName, convertedDto);
+        } else throw Error(`Неизвестный тип геообъекта: \"${geoObjectDTO.type}\". Должен быть из этого списка: {${this._typesToCheck}}`);
     }
     addNewLayer(layerDTO) {
         let checkedLayerName = this._layerNotExist(layerDTO.name);
         if (this._typesToCheck.includes(layerDTO.type)) {
             // добавляем новый слой
             this._layerStorage.set(checkedLayerName, layerDTO);
-        } else throw Error('неизвестный тип слоя');
+        } else throw Error(`Неизвестный тип слоя: \"${layerDTO.type}\". Должен быть из этого списка: {${this._typesToCheck}}`);
     }
     //включаем отображение на карте
     on(layerName) {
@@ -33,7 +33,7 @@ class MapLayerGeoObjectManager {
         //для каждого элемента массива вызываем добавление на карту
         this._layerStorage.get(checkedLayerName).arrGeoObjects.forEach(geoObjectDTO => {
             let mapGeoObj = this._GeoObjDTOConvertToMapGeoObj(geoObjectDTO);
-            this._addToMap(checkedLayerName, mapGeoObj.type, mapGeoObj.coordinate, mapGeoObj.properties, mapGeoObj.options);
+            this._addToMap(checkedLayerName, mapGeoObj);
         });
     }
 
@@ -108,9 +108,6 @@ class MapLayerGeoObjectManager {
     //конвертирует с dto в mapGeoObj
     _GeoObjDTOConvertToMapGeoObj(geoObjectDTO) {
         let jsonObj = JSON.parse(geoObjectDTO.strJson); //преобразуем строковый JSON в объект JSON
-        //добавляем параметры
-        jsonObj.properties.iconCaption = geoObjectDTO.name;
-        jsonObj.properties.hintContent = geoObjectDTO.description;
         let arrOfCoordinates = new Array;
         //в зависимости от типа геобъекта преобразуем массив геобъектов в массив массивов или массив
         if (geoObjectDTO.type == "point") {
@@ -123,24 +120,28 @@ class MapLayerGeoObjectManager {
         }
 
         return {
+            name: geoObjectDTO.name,
+            description: geoObjectDTO.description,
+            forwardArrowDirection: geoObjectDTO.forwardArrowDirection,
             type: geoObjectDTO.type,
             coordinate: arrOfCoordinates,
-            properties: jsonObj.properties,
-            options: jsonObj.options
+            params: jsonObj
         };
     }
+    //добавляем св-ва геообъекту
+    _addProperties(obj, convertedDto) {}
     // добавляем на карту вкладываемый геообъект
-    _addToMap(layerName, typeGeoObj, coordinates, properties, options){
-        if (typeGeoObj == 'arrow') {//только так можно удобно обработать модуль стрелки
+    _addToMap(layerName, convertedDto){
+        if (convertedDto.type == 'arrow') {//только так можно удобно обработать модуль стрелки
             //при помощи модуля стрелки создаём её на карте
             moduleArrow.spread(Arrow => {
-                let obj = new Arrow(coordinates, properties, options);
+                let obj = new Arrow(convertedDto.coordinate, convertedDto.params.properties, convertedDto.params.options);
                 //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
                 obj.layerName = layerName;
                 //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
                 obj.indexId = this._layerStorage.get(layerName).arrGeoObjects.length - 1;
                 //добавляем доп характеристики объекту
-                this._addEvent(obj);
+                this._addEvent(obj, convertedDto.params);
                 //добавляем на карту
                 this._map.geoObjects.add(obj);
                 
@@ -148,18 +149,19 @@ class MapLayerGeoObjectManager {
         } else {
 
             let obj;
-            if (typeGeoObj == 'point') {
-                obj = new ymaps.Placemark(coordinates, properties, options);
-            } else if (typeGeoObj == 'line') {
-                obj = new ymaps.Polyline(coordinates, properties, options);
-            } else if (typeGeoObj == 'broken_line') {
-                obj = new ymaps.Polyline(coordinates, properties, options);
-            }
+            if (convertedDto.type == 'point') {
+                obj = new ymaps.Placemark(convertedDto.coordinate, convertedDto.params.properties, convertedDto.params.options);
+            } else if (convertedDto.type == 'line') {
+                obj = new ymaps.Polyline(convertedDto.coordinate, convertedDto.params.properties, convertedDto.params.options);
+            } else if (convertedDto.type == 'broken_line') {
+                obj = new ymaps.Polyline(convertedDto.coordinate, convertedDto.params.properties, convertedDto.params.options);
+            } else throw Error(`Для создания на карте, такого типа геообъекта как: \"${convertedDto.type}\", не существует.`)
             //добавляем метод к геообъекту при помощи которого мы сможем его отличать от других слоёв
             obj.layerName = layerName;
             //присваиваем id по индексу в массиве !!!!!!!!!в последующем если удалять через delete arr[5], то length не поменяется
             obj.indexId = this._layerStorage.get(layerName).arrGeoObjects.length - 1;
             //добавляем доп характеристики объекту
+            this._addProperties(obj, convertedDto);
             this._addEvent(obj);
             //добавляем на карту
             this._map.geoObjects.add(obj)

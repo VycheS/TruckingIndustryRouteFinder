@@ -17,7 +17,6 @@ modalNewInformationLayot.addEventListener('submit', function (e) {
 let modalNewTruckingIndustryLayot = document.querySelector('#newTruckingIndustryLayot');
 modalNewTruckingIndustryLayot.addEventListener('submit', function (e) {
     e.preventDefault();
-    console.log(this.name.value + " " + this.type.value);
     app.createTruckingIndustryLayer(this.name.value, this.type.value);
     location.hash = '#close';//закрываем
     modalNewTruckingIndustryLayot.reset();//очищаем после ввода

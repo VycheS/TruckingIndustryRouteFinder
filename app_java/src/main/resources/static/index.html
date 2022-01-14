@@ -60,7 +60,8 @@
                 <p>
                     <label for="type">Тип:</label>
                     <select id="type">
-                        <option value="store">склады/пункты доставки</option>
+                        <option value="deliveryPoint">пункты доставки</option>
+                        <option value="goods">товары</option>
                         <option value="truck">грузоперевозчики</option>
                     </select>
                 </p>
@@ -85,6 +86,27 @@
         <li>Балун: <br> <input id="balloonText" autocomplete="off"/></li>
         <li align="center"><input type="submit" value="Сохранить"><input type="reset" value="Очистить"></li>
     </form>
+    <!-- окна редактирования геообъектов для грузоперевозок -->
+    <form id="menuDeliveryPoint" class="modalMenu" action="#">
+        <a href="#close" title="Закрыть" class="close">X</a>
+        <label for="readiness">Готовность принять товары:</label>
+        <br>
+        <select id="readiness">
+            <option value="yes">Да</option>
+            <option value="no">Нет</option>
+        </select>
+    </form>
+    <form id="menuGoods" class="modalMenu" action="#">
+       <a href="#close" title="Закрыть" class="close">X</a>
+       <li>Вес: <br> <input id="weight" autocomplete="off"/></li>
+       <li>Пункт доставки: <br> <input id="deliveryPoint" autocomplete="off"/></li>
+       <li align="center"><input type="submit" value="Сохранить"><input type="reset" value="Очистить"></li>
+   </form>
+   <form id="menuTruck" class="modalMenu" action="#">
+      <a href="#close" title="Закрыть" class="close">X</a>
+      <li>Грузоподъёмность: <br> <input id="carrying" autocomplete="off"/></li>
+      <li align="center"><input type="submit" value="Сохранить"><input type="reset" value="Очистить"></li>
+  </form>
     <script src="./js/includeScripts.js"></script>
 </body>
 

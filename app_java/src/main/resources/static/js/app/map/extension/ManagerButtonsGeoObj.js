@@ -98,7 +98,7 @@ class ManagerButtonsGeoObj{
     }
     //в зависимости от слоя выставляем активную кнопку и активный тип геообъекта
     setTypeLayer(type = undefined){
-        if ((type != undefined) && (this._typesLayers.some(item => item === type))) {//проверяем на сущ-ие и на наличие нужного нам значения
+        if ((type != undefined) && (this._typesLayers.includes(type))) {//проверяем на сущ-ие и на наличие нужного нам значения
             //выcтавляем активное значение типа геообъекта в зависимости от приходящего типа слоя
             this._activeTypeGeoObj = type;
             //обнуляем все кроме выбранных

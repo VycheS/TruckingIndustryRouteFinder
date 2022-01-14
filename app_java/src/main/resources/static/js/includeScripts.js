@@ -9,22 +9,13 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
     /* Функция ymaps.ready() будет вызвана, когда загрузятся 
     все компоненты API, а также когда будет готово DOM-дерево. */
     .then(script => ymaps.ready()
-        .then(script => addScripts('./js/app/dto/nested_database_entities/',
+        .then(script => addScripts('./js/app/dto/',
             [
                 'CoordinateDTO.js',
                 'ClientDTO.js',
                 'GeoObjectDTO.js',
                 'LayerGroupDTO.js',
                 'LayerDTO.js'
-            ]
-        ))
-        .then(script => addScripts('./js/app/dto/business_entity/',
-            [
-                'PointingArrowDTO.js',
-                'GoodsDTO.js',
-                'RouteDTO.js',
-                'StoreDTO.js',
-                'TruckDTO.js'
             ]
         ))
         .then(script => addScripts('./js/app/restapi/extends/',['CRUD.js']))
@@ -36,9 +27,10 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
                 'LayerCRUD.js'
             ]
         ))
+        .then(script => addScripts('./js/app/map/extension/',['MapLayerGeoObjectManager.js']))
         .then(script => addScripts('./js/app/map/extension/',
             [
-                'MapLayerGeoObjectManager.js',
+                'MapTruckingIndustryManager.js',
                 'ManagerButtonsGeoObj.js'
             ]
         ))
@@ -58,7 +50,7 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
 
 
 //---------------ФУНКЦИЯ ДОБАВЛЕНИЯ СКРИПТОВ----------------------
-async function addScripts(path, scripts, options = { async: true, appendTo: 'body' }) {
+async function addScripts(path, scripts, options = { async: false, appendTo: 'body' }) {
     //возвращаем промисс чтобы подключить следующий скрипт после подключения этого
     return await new Promise((resolve, reject) => {
         //локальные стандартные настройки добавления скриптов
