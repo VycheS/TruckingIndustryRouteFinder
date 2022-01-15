@@ -11,8 +11,6 @@ class App {
             //включение или отключение способов взаимодействия с картой
             behaviors: ['drag', 'scrollZoom']
         });
-        //база данных для сохранения
-        this._layerDB = new LayerCRUD("/client/1/layer_group/1/layers");// пока тестовое
         //кнопки выбора геообъектов;
         this._buttonGeoObj = new ManagerButtonsGeoObj();
         //буфер для хранения контролируемый кнопками выбора геообъекта
@@ -164,6 +162,17 @@ class App {
 
         });
     }
+
+    sendToServer() {
+        //база данных для сохранения слоёв
+        this._layerDB = new LayerCRUD("/client/1/layer_group/3/layers");
+        this._layerStorage.get("truckingIndustry").forEach(layer => {
+
+        });
+        // //база данных для сохранения геообъектов
+        // this._geoObjectDB = new GeoObjectCRUD("/client/1/layer_group/3/layer/{layer_id}/geo_objects");
+    }
+
     outputDtoToConsole (){
         console.log(this._layerStorage);
     }
@@ -198,7 +207,7 @@ class App {
                 this._editTruckingIndustryLayersControl.getConvertToStandartType(type), //type
                 name, //name
                 null, //description
-                `trucking_industry:${JSON.stringify(trucking_industry)}`, //strJson
+                `{\"trucking_industry\":${JSON.stringify(trucking_industry)}}`, //strJson
                 new Array
             ));
             this._editTruckingIndustryLayersControl.addItem(name, type);
