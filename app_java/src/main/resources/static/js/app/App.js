@@ -19,10 +19,12 @@ class App {
         this._bufferCoordinates = this._buttonGeoObj.getBuffer();
         //хранилище слоёв типа данных коллекции Map
         this._layerStorage = new Map();
+        this._layerStorage.set('information', new Map()); //хранилище информационных слоёв
+        this._layerStorage.set('truckingIndustry', new Map()); //хранилище грузоперевозочных слоёв
         //менеджер слоёв и их геообъектов
-        this._mapLayerGeoObjectManager = new MapLayerGeoObjectManager(this._map, this._layerStorage);
+        this._mapLayerGeoObjectManager = new MapLayerGeoObjectManager(this._map, this._layerStorage.get('information'));
         //менеджер грузоперевозочных слоёв унаследованный от менеджера слоёв
-        this._mapTruckingIndustryManager = new MapTruckingIndustryManager(this._map, this._layerStorage);
+        this._mapTruckingIndustryManager = new MapTruckingIndustryManager(this._map, this._layerStorage.get('truckingIndustry'));
         //лист бокс для создания и редактирования информационного слоя
         this._editInformationLayersControl = new EditInformationLayersControl(this._buttonGeoObj);
         //лист бокс для создания и редактирования грузоперевозочного слоя
@@ -59,8 +61,6 @@ class App {
             switch (this._buttonGeoObj.getActiveTypeGeoObj()) {
                 case "point":
                     if (eType == 'mouseup') {
-                        
-                        //TODO добавить сюда editTruckingIndustryLayerControl
                         if (this._editInformationLayersControl.getSelectedLayer() != undefined) {
                             this._mapLayerGeoObjectManager.addGeoObject(this._editInformationLayersControl.getSelectedLayer(), new GeoObjectDTO(
                                 null, //id
@@ -164,11 +164,21 @@ class App {
 
         });
     }
+    outputDtoToConsole (){
+        console.log(this._layerStorage);
+    }
     // ДЛЯ ПРИВЯЗКИ К МОДАЛЬНОМУ ОКНУ
     // создание нового информационного слоя
     createLayer(name, type) {
         if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(name)) {
-            this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(null, type, name, null, null, new Array));
+            this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(
+                null, //id
+                type, //type
+                name, //name
+                null, //description
+                null, //strJson
+                new Array
+            ));
             this._editInformationLayersControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {
@@ -179,8 +189,18 @@ class App {
     // создание нового грузоперевозочного слоя
     createTruckingIndustryLayer(name, type) {
         if (!this._mapTruckingIndustryManager.booleanExistenceCheck(name)) {
+            let trucking_industry = {
+                type: type
+            }; 
             //не забываем конвертировать тип слоя, чтобы он конкретно работал с менеджером слоёв
-            this._mapTruckingIndustryManager.addNewLayer(new LayerDTO(null, this._editTruckingIndustryLayersControl.getConvertToStandartType(type), name, null, null, new Array));
+            this._mapTruckingIndustryManager.addNewLayer(new LayerDTO(
+                null, //id
+                this._editTruckingIndustryLayersControl.getConvertToStandartType(type), //type
+                name, //name
+                null, //description
+                `trucking_industry:${JSON.stringify(trucking_industry)}`, //strJson
+                new Array
+            ));
             this._editTruckingIndustryLayersControl.addItem(name, type);
             this._legendMap.addItem(name, type);
         } else {
