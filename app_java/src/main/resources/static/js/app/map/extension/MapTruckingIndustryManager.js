@@ -41,10 +41,19 @@ class MapTruckingIndustryManager extends MapLayerGeoObjectManager {
             obj.properties.set('hintContent', convertedDto.description);
         }
         //балун геообъекта
-        let balloon = `<li>Название: ${hintDescription} №${nameGeoObj}</li>`
+        let newBalloon = `<li>Название: ${hintDescription} №${nameGeoObj}</li>`
                     + `<li>Координаты: ${obj.geometry.getCoordinates()}</li>`;
-        //меняем балун объекта
-        obj.properties.set('balloonContent', balloon);
+        //если нет балуна основы то создаём её
+        if ([undefined, null, ''].includes(obj.trucking_industry.balloon)) {
+            //меняем балун объекта
+            obj.properties.set('balloonContent', newBalloon);
+            //создаём объект balloon для прицепа
+            obj.trucking_industry.balloon = {};
+            //прицепляем балун основа, для последующей обработки
+            obj.trucking_industry.balloon.basis = newBalloon;
+        } else if ([undefined, null, ''].includes(obj.trucking_industry.balloon.full)) { //если балун основа есть то её применяем к балуну объекта
+            obj.properties.set('balloonContent', obj.trucking_industry.balloon.basis);
+        } else  obj.properties.set('balloonContent', obj.trucking_industry.balloon.full) //если есть полный балун то её применяем к балуну объекта
     }
     // добавляем события к геообектам
     _addEvent(obj) {
@@ -76,21 +85,29 @@ class MapTruckingIndustryManager extends MapLayerGeoObjectManager {
                 e.preventDefault();
                 if (obj.trucking_industry.type == 'truck') {
                     //получаем грузоподъёмность грузоперевозчика
-                    obj.trucking_industry.carrying = this._menu.carrying.value;
+                    obj.trucking_industry.carrying = menu.carrying.value;
+                    //создаём полный балун
+                    obj.trucking_industry.balloon.full = obj.trucking_industry.balloon.basis + `<li>Грузоподъёмность в кг: ${menu.carrying.value}</li>`;
+                    //меняем балун объекта
+                    obj.properties.set('balloonContent', obj.trucking_industry.balloon.full);
                 } else if (obj.trucking_industry.type == 'goods') {
                     //получаем вес груза
-                    obj.trucking_industry.weight = this._menu.weight.value;
+                    obj.trucking_industry.weight = menu.weight.value;
                     //получаем имя пункта доставки
-                    obj.trucking_industry.deliveryPoint = this._menu.deliveryPoint.value;
+                    obj.trucking_industry.deliveryPoint = menu.deliveryPoint.value;
+                    //создаём полный балун
+                    obj.trucking_industry.balloon.full = obj.trucking_industry.balloon.basis + `<li>Вес в кг: ${menu.weight.value}</li>` + `<li>Пункт доставки: ${menu.deliveryPoint.value}</li>`;
+                    //меняем балун объекта
+                    obj.properties.set('balloonContent', obj.trucking_industry.balloon.full);
                 }
 
                 let objJson = JSON.parse(this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].strJson);
-
+                
                 objJson.trucking_industry = obj.trucking_industry;
-
+                //применяем к strJson все изменения
                 this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].strJson = JSON.stringify(objJson);
                 //очищаем все поля ввода после применить
-                this._menu.reset();
+                menu.reset();
                 //закрываем после ввода
                 location.hash = '#close';
             }, { once: true });//TODO возможно он здесь и не нужен теперь
