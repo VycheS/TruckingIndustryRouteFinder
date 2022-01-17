@@ -30,12 +30,15 @@ class CRUD {
             } else {
                 httpParam = {"method": method,"headers": headers,"body": body}
             }
-            const response = await fetch(url, httpParam);
-            if (!(response.ok) ) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            } else {
-                return response;
-            }
+            return fetch(url, httpParam);
+            // return response;
+            
+            // const response = await fetch(url, httpParam);            
+            // if (!(response.ok) ) {
+            //     throw new Error(`HTTP error! status: ${response.status}`);
+            // } else {
+            //     return response;
+            // }
         
     }
 }

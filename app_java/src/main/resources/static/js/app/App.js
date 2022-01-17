@@ -163,58 +163,234 @@ class App {
         });
     }
 
-    sendToServer() {
-        //база данных для сохранения слоёв
-        this._layerDB = new LayerCRUD("/client/1/layer_group/3/layers");
-        this._layerStorage.get("truckingIndustry").forEach(layer => {
-
+    applyAllGeoObjectsOnTheMap(layerManagerType = "information") {
+        let layers;
+        if ('information' === layerManagerType) {
+            layers = {
+                storage: this._layerStorage.get("information"),
+                mapManager: this._mapLayerGeoObjectManager,
+                // managerControl: this._editInformationLayersControl
+            }
+        } else if (('truckingIndustry' === layerManagerType)) {
+            layers = {
+                storage: this._layerStorage.get("truckingIndustry"),
+                mapManager: this._mapTruckingIndustryManager,
+                // managerControl: this._editTruckingIndustryLayersControl
+            }
+        } else throw Error(`Такого типа хранилища слоёв как:${layerManagerType}, не существует.`);
+        layers.storage.forEach(layer => {
+            layers.mapManager.off(layer.name);
+            layers.mapManager.on(layer.name);
+            // layers.managerControl.deselectAll();
         });
-        // //база данных для сохранения геообъектов
-        // this._geoObjectDB = new GeoObjectCRUD("/client/1/layer_group/3/layer/{layer_id}/geo_objects");
     }
+
+    async getLayersFromTheServer(clientId = 1, layerGroupId = 4, layerManagerType = 'information') {
+        const layerCrud = new LayerCRUD(clientId,layerGroupId);
+        layerCrud.readAll()
+            .then(async response => {
+                if (response.ok) {
+                    (await response).json()
+                        .then(async jsonLayers => {
+                            jsonLayers.forEach(async layer => {
+                                const geoObjectCrud = new GeoObjectCRUD(clientId,layerGroupId, layer.id);
+                                const arrGeoObjects = new Array();
+                                geoObjectCrud.readAll()
+                                    .then(async response => {
+                                        if (response.ok){
+                                            (await response).json()
+                                                .then(async jsonGeoObjects => {
+                                                    jsonGeoObjects.forEach(async geoObject => {
+                                                        const arrCoordinatesDTO = new Array();
+                                                        const strJson = (["", null].includes(geoObject.strJson)) ? JSON.stringify({options:{}, properties:{}}) : layer.strJson;
+                                                        if (geoObject.coordinates != null && Array.isArray(geoObject.coordinates)) {
+                                                            geoObject.coordinates.forEach(coord => {
+                                                                arrCoordinatesDTO.push(new CoordinateDTO(coord.latitude, coord.longitude));
+                                                            });    
+                                                        }
+                                                        arrGeoObjects.push(new GeoObjectDTO(geoObject.id
+                                                            , geoObject.name
+                                                            , geoObject.type
+                                                            , geoObject.forwardArrowDirection
+                                                            , arrCoordinatesDTO
+                                                            , geoObject.description
+                                                            , strJson
+                                                            ));
+                                                    });
+                                                })
+                                        } else console.log(response.status)
+                                    }).catch(e => console.log(e))
+                                    .then(async () => {
+                                        const layerDTO = new LayerDTO(layer.id, layer.typeObj, layer.name, layer.description, layer.strJson, arrGeoObjects);
+                                        if ('information' === layerManagerType) {
+                                            this.createLayer(layer.name
+                                                , layer.typeObj
+                                                , layerDTO
+                                            );
+                                        } else if ('truckingIndustry' === layerManagerType) {
+                                            this.createTruckingIndustryLayer(layer.name
+                                                , layer.typeObj
+                                                , layerDTO
+                                            );
+                                        } else throw Error(`Такого типа менеджера как:${layerManagerType}, не существует`);
+
+                                    }).then(async () => {
+                                        if ('information' === layerManagerType) {
+                                            return {
+                                                layerManager: this._mapLayerGeoObjectManager,
+                                                layerManagerControl: this._editInformationLayersControl
+                                            }
+                                        } else if (('truckingIndustry' === layerManagerType)) {
+                                            return {
+                                                layerManager: this._mapTruckingIndustryManager,
+                                                layerManager: this._editTruckingIndustryLayersControl
+                                            }
+                                        } else throw Error(`Такого типа хранилища слоёв как:${layerManagerType}, не существует.`);
+                                    }).then(async (action) => {
+                                        // action.layerManager.applyLayerDTOToMap(layer.name); //TODO почему то не работает!!!
+                                        action.layerManagerControl.deselectAll();
+                                    });
+                            });
+                        });
+                } else console.log(response.status);
+            }).catch(e => console.log(e));
+    }
+
+    async deletingLayersOnTheServer(clientId = 1, layerGroupId = 4) {
+        const layerCrud = new LayerCRUD(clientId,layerGroupId);
+        const responceAfterReadAll = layerCrud.readAll();
+        try {
+            if ((await responceAfterReadAll).ok) {
+                (await responceAfterReadAll).json().then(async json => {
+                    const arr = new Array();
+                    json.forEach(item => {
+                        arr.push(item.id);
+                    });
+                    arr.forEach(async element => {
+                        const responceAfterDelete = layerCrud.delete(element);
+                        if ((await responceAfterDelete).ok) {
+                            console.log("succes");
+                        }
+                    });
+                });
+                return true;
+            } 
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async sendingLayersToServer(clientId = 1, layerGroupId = 4, layerManagerType = 'information') {
+        const layerCrud = new LayerCRUD(clientId,layerGroupId);
+        let layerManager;
+        if (layerManagerType === 'information') {
+            layerManager = this._layerStorage.get('information');
+        } else if (layerManagerType === 'truckingIndustry') {
+            layerManager = this._layerStorage.get('truckingIndustry');
+        } else throw Error(`Такого типа менеджера как:${layerManagerType}, не существует`);
+
+        layerManager.forEach(async layer => {
+            //копия слоя без массива геообъекта и переименование его св-ва с type на typeObj
+            const copyLayerWithoutArrGeoObj = {
+                typeObj: layer.type,
+                name: layer.name,
+                //обработка  null c последующим вкладыванием своего значения
+                description: (layer.description == null) ? layer.type : layer.description,
+                strJson: (layer.strJson == null) ? JSON.stringify({properties: {}, options: {}}) : layer.strJson
+            }
+            layerCrud.create(copyLayerWithoutArrGeoObj)
+                .then(async response => {
+                    if ((await response).ok) {
+                        response.json()
+                            .then(async layerUuid => {
+                                const layerCrud = new GeoObjectCRUD(clientId, layerGroupId, layerUuid);
+                                let geoObjIndex = 0 //нужен для того чтобы присвоить имя если его нет
+                                layer.arrGeoObjects.forEach(async geoObject => {
+                                    geoObjIndex += 1;
+                                    //если имени нет то мы его присваиваем в том числе и для описания
+                                    geoObject.name = (geoObject.name == null) ? layer.name + geoObjIndex : geoObject.name;
+                                    geoObject.description = (geoObject.description == null) ? layer.name + geoObjIndex : geoObject.description;
+
+                                    geoObject.coordinates = geoObject.coordinate;
+                                    console.log(geoObject);
+                                    layerCrud.create(geoObject)
+                                        .then(async response => {
+                                            if ((await response).ok) {
+                                                console.log('succes');
+                                            } else (await response).text().then(txt => console.log(txt));
+                                        })
+                                        .catch(e => console.error(e))
+                                });
+                            });
+                    // } else console.log((await response).status);
+                    } else (await response).text().then(txt => console.log(txt));
+                })
+
+                .catch(e => console.error(e))
+            
+        });//TODO доделать!
+    }
+
 
     outputDtoToConsole (){
         console.log(this._layerStorage);
     }
     // ДЛЯ ПРИВЯЗКИ К МОДАЛЬНОМУ ОКНУ
     // создание нового информационного слоя
-    createLayer(name, type) {
-        if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(name)) {
-            this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(
-                null, //id
-                type, //type
-                name, //name
-                null, //description
-                null, //strJson
-                new Array
-            ));
-            this._editInformationLayersControl.addItem(name, type);
-            this._legendMap.addItem(name, type);
+    createLayer(name, type, layerDTO = null) {
+        if (layerDTO == null) {
+            if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(name)) {
+                this._mapLayerGeoObjectManager.addNewLayer(new LayerDTO(
+                    null, //id
+                    type, //type
+                    name, //name
+                    null, //description
+                    null, //strJson
+                    new Array
+                ));
+                this._editInformationLayersControl.addItem(name, type);
+                this._legendMap.addItem(name, type);
+            } else {
+                // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
+                alert(`Слой ${name} существует`);
+            }
         } else {
-            // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
-            alert(`Слой ${name} существует`);
+            if (!this._mapLayerGeoObjectManager.booleanExistenceCheck(layerDTO.name)) {
+                this._mapLayerGeoObjectManager.addNewLayer(layerDTO);
+                this._editInformationLayersControl.addItem(name, type);
+                this._legendMap.addItem(name, type);
+            }
         }
     }
     // создание нового грузоперевозочного слоя
-    createTruckingIndustryLayer(name, type) {
-        if (!this._mapTruckingIndustryManager.booleanExistenceCheck(name)) {
-            let trucking_industry = {
-                type: type
-            }; 
-            //не забываем конвертировать тип слоя, чтобы он конкретно работал с менеджером слоёв
-            this._mapTruckingIndustryManager.addNewLayer(new LayerDTO(
-                null, //id
-                this._editTruckingIndustryLayersControl.getConvertToStandartType(type), //type
-                name, //name
-                null, //description
-                `{\"trucking_industry\":${JSON.stringify(trucking_industry)}}`, //strJson
-                new Array
-            ));
-            this._editTruckingIndustryLayersControl.addItem(name, type);
-            this._legendMap.addItem(name, type);
+    createTruckingIndustryLayer(name, type, layerDTO = null) {
+        if (layerDTO == null) {
+            if (!this._mapTruckingIndustryManager.booleanExistenceCheck(name)) {
+                let trucking_industry = {
+                    type: type
+                }; 
+                //не забываем конвертировать тип слоя, чтобы он конкретно работал с менеджером слоёв
+                this._mapTruckingIndustryManager.addNewLayer(new LayerDTO(
+                    null, //id
+                    this._editTruckingIndustryLayersControl.getConvertToStandartType(type), //type
+                    name, //name
+                    null, //description
+                    `{\"trucking_industry\":${JSON.stringify(trucking_industry)}}`, //strJson
+                    new Array
+                ));
+                this._editTruckingIndustryLayersControl.addItem(name, type);
+                this._legendMap.addItem(name, type);
+            } else {
+                // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
+                alert(`Слой ${name} существует`);
+            }
+            
         } else {
-            // TODO ПЕРЕПИСАТЬ НА МОДАЛЬНОЕ ОКНО
-            alert(`Слой ${name} существует`);
+            if (!this._mapTruckingIndustryManager.booleanExistenceCheck(layerDTO.name)) {
+                this._mapTruckingIndustryManager.addNewLayer(layerDTO);
+                this._editTruckingIndustryLayersControl.addItem(name, type);
+                this._legendMap.addItem(name, type);
+            }
         }
     }
 
