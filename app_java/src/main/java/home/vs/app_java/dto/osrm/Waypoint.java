@@ -1,27 +1,31 @@
-package home.vs.app_java.dto;
+package home.vs.app_java.dto.osrm;
 
-public class LayerGroupDTO {
-    private int id;
+import java.util.List;
+
+public class Waypoint {
     private String name;
-    
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    
+    private List<Double> location;
+    // public Waypoint(String name, List<Double> location) {
+    //     this.name = name;
+    //     this.location = location;
+    // }
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
     }
+    public List<Double> getLocation() {
+        return location;
+    }
+    public void setLocation(List<Double> location) {
+        this.location = location;
+    }
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + id;
+        result = prime * result + ((location == null) ? 0 : location.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
@@ -33,8 +37,11 @@ public class LayerGroupDTO {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        LayerGroupDTO other = (LayerGroupDTO) obj;
-        if (id != other.id)
+        Waypoint other = (Waypoint) obj;
+        if (location == null) {
+            if (other.location != null)
+                return false;
+        } else if (!location.equals(other.location))
             return false;
         if (name == null) {
             if (other.name != null)
@@ -45,7 +52,6 @@ public class LayerGroupDTO {
     }
     @Override
     public String toString() {
-        return "LayerGroupDTO [id=" + id + ", name=" + name + "]";
-    }
-    
+        return "Waypoint [location=" + location + ", name=" + name + "]";
+    } 
 }

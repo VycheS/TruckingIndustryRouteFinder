@@ -147,7 +147,6 @@ class MapLayerGeoObjectManager {
                 
             });
         } else {
-
             let obj;
             if (convertedDto.type == 'point') {
                 obj = new ymaps.Placemark(convertedDto.coordinate, convertedDto.params.properties, convertedDto.params.options);

@@ -33,6 +33,8 @@ class MapTruckingIndustryManager extends MapLayerGeoObjectManager {
                 hintDescription = "Грузоперевозчик";
             } else if (obj.trucking_industry.type == 'goods') {
                 hintDescription = "Товар/Груз";
+            } else if (obj.trucking_industry.type == 'route') {
+                hintDescription = "Маршрут";
             } else throw Error(`Такого типа геообъектов:\"${obj.trucking_industry.type}\" для грузоперевозок, не существует`);
             obj.properties.set('hintContent', hintDescription);
             this._layerStorage.get(obj.layerName).arrGeoObjects[obj.indexId].description = hintDescription; //в том числе и имя в geoObjDTO

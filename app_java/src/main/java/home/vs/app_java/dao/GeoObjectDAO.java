@@ -148,9 +148,9 @@ public class GeoObjectDAO {
                 coordinateTemplate.add("ROW(?, ?)::coord");
             }
 
-            final String inParamsCoordinate = "ARRAY[ " + String.join(", ", coordinateTemplate) + " ]";
+            final String inParamsCoordinate = "ARRAY[ " + String.join(", ", coordinateTemplate) + " ]::coord[]";
             final String sql = "INSERT INTO geo_object(layer_id, name, type, forward_arrow_direction, description, json_data, coordinate)\n"
-                            +  "VALUES(?, ?, ?::geo_obj_type, ?, ?, ?, " + inParamsCoordinate + ")";
+                            +  "VALUES(?, ?, ?::geo_obj_type, ?, ?, ?::jsonb, " + inParamsCoordinate + ")";
 
             return this.jdbcTemplate.update(sql, listObjects.toArray()) > 0;
         }

@@ -16,7 +16,7 @@ public class LayerServiceImpl implements LayerService {
     private LayerDAO layerDAO;
 
     @Override
-    public boolean create(LayerDTO layer, int layerGroupId, int clientId) {
+    public UUID create(LayerDTO layer, int layerGroupId, int clientId) {
         return this.layerDAO.save(layer, layerGroupId, clientId);
         
     }

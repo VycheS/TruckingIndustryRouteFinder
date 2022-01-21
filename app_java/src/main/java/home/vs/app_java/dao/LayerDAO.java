@@ -63,25 +63,33 @@ public final class LayerDAO {
                 .orElse(null);
     }
 
-    public boolean save(LayerDTO layer, int layerGroupId, int clientId) {
+    public UUID save(LayerDTO layer, int layerGroupId, int clientId) {
         if (this.entityIdExists(layerGroupId, clientId)) {
             final String sql = "INSERT INTO layer(layer_group_id, type, name, description, json_data)\n"
-                        +"VALUES(?, ?, ?, ?, ?)";
+                            +  "VALUES(?, ?::geo_obj_type, ?, ?, ?::jsonb) RETURNING id";
             layer.setLayerGroupId(layerGroupId);
-            return this.jdbcTemplate.update(
-                    sql,
-                    new Object[]{layer.getLayerGroupId(), layer.getTypeObj(), layer.getName(), layer.getDescription(), layer.getStrJson()},
-                    new int[]{Types.INTEGER, Types.OTHER, Types.VARCHAR, Types.VARCHAR, Types.OTHER}
-                ) > 0;
+            return this.jdbcTemplate.queryForObject(sql
+                , UUID.class
+                , layer.getLayerGroupId()
+                , layer.getTypeObj()
+                , layer.getName()
+                , layer.getDescription()
+                , layer.getStrJson()
+            );
+            // return this.jdbcTemplate.update(
+            //         sql,
+            //         new Object[]{layer.getLayerGroupId(), layer.getTypeObj(), layer.getName(), layer.getDescription(), layer.getStrJson()},
+            //         new int[]{Types.INTEGER, Types.OTHER, Types.VARCHAR, Types.VARCHAR, Types.OTHER}
+            //     ) > 0;
                 
         }
-        return false;
+        return null;
     }
 
     public boolean update(LayerDTO updatedLayer, UUID id, int layerGroupId, int clientId) {
         if (this.entityIdExists(layerGroupId, clientId)) {
             final String sql = "UPDATE layer\n"
-                            +  "SET layer_group_id = ?, type = ?, name = ?, description = ?, json_data = ?\n"
+                            +  "SET layer_group_id = ?, type = ?, name = ?, description = ?, json_data = ?::jsonb\n"
                             +  "WHERE id=?";
             updatedLayer.setId(id);
             updatedLayer.setLayerGroupId(layerGroupId);

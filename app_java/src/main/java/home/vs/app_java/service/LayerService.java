@@ -11,9 +11,9 @@ public interface LayerService {
      * @param layer - слой для последующего создания
      * @param layerGroupId - id группы слоёв
      * @param clientId - id клиента
-     * @return - true если слой создан, иначе false
+     * @return - возращает UUID созданного слоя, иначе null
      */
-    boolean create(LayerDTO layer, int layerGroupId, int clientId);
+    UUID create(LayerDTO layer, int layerGroupId, int clientId);
 
     /**
      * Возвращает список всех имеющихся слоёв.

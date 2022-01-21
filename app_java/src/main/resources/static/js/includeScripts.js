@@ -24,7 +24,8 @@ addScripts('', ['https://api-maps.yandex.ru/2.1/?apikey=c7544186-fcd7-4a87-a03e-
                 'ClientCRUD.js',
                 'GeoObjectCRUD.js',
                 'LayerGroupCRUD.js',
-                'LayerCRUD.js'
+                'LayerCRUD.js',
+                'FindRouteCRUD.js'
             ]
         ))
         .then(script => addScripts('./js/app/map/extension/',['MapLayerGeoObjectManager.js']))

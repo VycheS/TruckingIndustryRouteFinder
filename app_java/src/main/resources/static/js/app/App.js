@@ -163,7 +163,7 @@ class App {
         });
     }
 
-    applyAllGeoObjectsOnTheMap(layerManagerType = "information") {
+    applyAllGeoObjectsOnTheMap(layerManagerType = "truckingIndustry") {
         let layers;
         if ('information' === layerManagerType) {
             layers = {
@@ -185,7 +185,17 @@ class App {
         });
     }
 
-    async getLayersFromTheServer(clientId = 1, layerGroupId = 4, layerManagerType = 'information') {
+    async findRoute(clientId = 1, layerGroupId = 4) {
+        const findRoute = new FindRouteCRUD(clientId,layerGroupId);
+        findRoute.sendCommandToServer()
+            .then(async response => {
+                if ((await response).ok) {
+                    console.log("Поиск завершён")
+                } else console.log(response.status);
+            }).catch(async e => console.log(e));
+    }
+
+    async getLayersFromTheServer(clientId = 1, layerGroupId = 4, layerManagerType = 'truckingIndustry') {
         const layerCrud = new LayerCRUD(clientId,layerGroupId);
         layerCrud.readAll()
             .then(async response => {
@@ -201,8 +211,8 @@ class App {
                                             (await response).json()
                                                 .then(async jsonGeoObjects => {
                                                     jsonGeoObjects.forEach(async geoObject => {
+                                                        const strJson = (["", null].includes(geoObject.strJson)) ? JSON.stringify({options:{geodesic: true,strokeWidth: 5,opacity: 0.5}, properties:{}}) : geoObject.strJson;
                                                         const arrCoordinatesDTO = new Array();
-                                                        const strJson = (["", null].includes(geoObject.strJson)) ? JSON.stringify({options:{}, properties:{}}) : layer.strJson;
                                                         if (geoObject.coordinates != null && Array.isArray(geoObject.coordinates)) {
                                                             geoObject.coordinates.forEach(coord => {
                                                                 arrCoordinatesDTO.push(new CoordinateDTO(coord.latitude, coord.longitude));
@@ -243,7 +253,7 @@ class App {
                                         } else if (('truckingIndustry' === layerManagerType)) {
                                             return {
                                                 layerManager: this._mapTruckingIndustryManager,
-                                                layerManager: this._editTruckingIndustryLayersControl
+                                                layerManagerControl: this._editTruckingIndustryLayersControl
                                             }
                                         } else throw Error(`Такого типа хранилища слоёв как:${layerManagerType}, не существует.`);
                                     }).then(async (action) => {
@@ -280,7 +290,7 @@ class App {
         }
     }
 
-    async sendingLayersToServer(clientId = 1, layerGroupId = 4, layerManagerType = 'information') {
+    async sendingLayersToServer(clientId = 1, layerGroupId = 4, layerManagerType = 'truckingIndustry') {
         const layerCrud = new LayerCRUD(clientId,layerGroupId);
         let layerManager;
         if (layerManagerType === 'information') {
@@ -312,7 +322,6 @@ class App {
                                     geoObject.description = (geoObject.description == null) ? layer.name + geoObjIndex : geoObject.description;
 
                                     geoObject.coordinates = geoObject.coordinate;
-                                    console.log(geoObject);
                                     layerCrud.create(geoObject)
                                         .then(async response => {
                                             if ((await response).ok) {
@@ -387,9 +396,16 @@ class App {
             
         } else {
             if (!this._mapTruckingIndustryManager.booleanExistenceCheck(layerDTO.name)) {
+                let newType;
+                if (['point', 'line'].includes(type)) {
+                    let objJson = JSON.parse(layerDTO.strJson);
+                    newType = objJson.trucking_industry.type;
+                } else {
+                    newType = type;
+                }
                 this._mapTruckingIndustryManager.addNewLayer(layerDTO);
-                this._editTruckingIndustryLayersControl.addItem(name, type);
-                this._legendMap.addItem(name, type);
+                this._editTruckingIndustryLayersControl.addItem(name, newType);
+                this._legendMap.addItem(name, newType);
             }
         }
     }

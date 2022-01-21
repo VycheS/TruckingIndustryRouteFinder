@@ -53,6 +53,23 @@ services:
       - backend
     # restart: unless-stopped
 
+  osrm:
+    container_name: osrm_container
+    image: osrm/osrm-backend
+    expose: 
+      - 5000
+    ports:
+      - 5000:5000
+    volumes:
+      - ./osrm_data:/data:rw
+    entrypoint:
+      - osrm-routed
+      - --algorithm
+      - mld
+      - /data/russia-latest.osrm
+    networks:
+      - backend
+
 networks:
   backend:
     driver: bridge

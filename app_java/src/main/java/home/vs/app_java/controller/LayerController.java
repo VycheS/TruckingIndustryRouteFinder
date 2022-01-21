@@ -28,15 +28,27 @@ public class LayerController {
     }
     
     @PostMapping(value = REQUEST)
-    public ResponseEntity<HttpStatus> create(
+    public ResponseEntity<UUID> create(
             @RequestBody LayerDTO layer,
             @PathVariable(name = "layer_group_id") int layerGroupId,
             @PathVariable(name = "client_id") int clientId) {
 
-        return layerService.create(layer, layerGroupId, clientId)
-            ? new ResponseEntity<>(HttpStatus.CREATED)
+            final UUID uuid = layerService.create(layer, layerGroupId, clientId);
+
+        return uuid != null
+            ? new ResponseEntity<>(uuid, HttpStatus.CREATED)
             : new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
     }
+    // @PostMapping(value = REQUEST)
+    // public ResponseEntity<HttpStatus> create(
+    //         @RequestBody LayerDTO layer,
+    //         @PathVariable(name = "layer_group_id") int layerGroupId,
+    //         @PathVariable(name = "client_id") int clientId) {
+
+    //     return layerService.create(layer, layerGroupId, clientId)
+    //         ? new ResponseEntity<>(HttpStatus.CREATED)
+    //         : new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    // }
 
     @GetMapping(value = REQUEST)
     public ResponseEntity<List<LayerDTO>> read(
