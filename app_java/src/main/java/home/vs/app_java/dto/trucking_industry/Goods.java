@@ -2,7 +2,7 @@ package home.vs.app_java.dto.trucking_industry;
 
 import home.vs.app_java.dto.CoordinateDTO;
 
-public final class Goods {
+public class Goods {
     private int id;
     private String name;
     private int weight;
