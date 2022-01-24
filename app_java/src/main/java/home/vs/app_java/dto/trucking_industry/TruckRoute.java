@@ -7,9 +7,11 @@ import home.vs.app_java.dto.CoordinateDTO;
 public final class TruckRoute {
     private int truckId;
     private List<CoordinateDTO> coordinates;
-    public TruckRoute(int truckId, List<CoordinateDTO> coordinates) {
+    private double length;
+    public TruckRoute(int truckId, List<CoordinateDTO> coordinates, double length) {
         this.truckId = truckId;
         this.coordinates = coordinates;
+        this.length = length;
     }
     public int getTruckId() {
         return truckId;
@@ -23,11 +25,20 @@ public final class TruckRoute {
     public void setCoordinates(List<CoordinateDTO> coordinates) {
         this.coordinates = coordinates;
     }
+    public double getLength() {
+        return length;
+    }
+    public void setLength(double length) {
+        this.length = length;
+    }
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((coordinates == null) ? 0 : coordinates.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(length);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + truckId;
         return result;
     }
@@ -45,12 +56,14 @@ public final class TruckRoute {
                 return false;
         } else if (!coordinates.equals(other.coordinates))
             return false;
+        if (Double.doubleToLongBits(length) != Double.doubleToLongBits(other.length))
+            return false;
         if (truckId != other.truckId)
             return false;
         return true;
     }
     @Override
     public String toString() {
-        return "TruckingIndustryRoute [coordinates=" + coordinates + ", truckId=" + truckId + "]";
+        return "TruckRoute [coordinates=" + coordinates + ", length=" + length + ", truckId=" + truckId + "]";
     }
 }

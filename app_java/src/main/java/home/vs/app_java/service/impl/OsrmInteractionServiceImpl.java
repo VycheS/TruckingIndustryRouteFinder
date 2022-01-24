@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import home.vs.app_java.service.OsrmInteractionService;
 import home.vs.app_java.dto.CoordinateDTO;
 import home.vs.app_java.dto.osrm.*;
+import home.vs.app_java.dto.trucking_industry.TruckRoute;
 
 @Service
 public class OsrmInteractionServiceImpl implements OsrmInteractionService {
@@ -46,20 +47,20 @@ public class OsrmInteractionServiceImpl implements OsrmInteractionService {
         return null;
     }
     @Override
-    public List<CoordinateDTO> getRoute(List<CoordinateDTO> listOfCoordinates) {
+    public TruckRoute getRoute(List<CoordinateDTO> listOfCoordinates) {
         if (listOfCoordinates != null && listOfCoordinates.size() > 1) {
             this.uriVariables.put("overview", "full");
             RouterContainer routerContainer = getRouterContainer(listOfCoordinates);
             List<Route> listOfRoutes = routerContainer.getRoutes();
             Route route = listOfRoutes.get(0);
+            String strDistance = route.getDistance();
             Geometry geometry = route.getGeometry();
             List<List<Double>> listOfArrCoordinates = geometry.getCoordinates();
             List<CoordinateDTO> coordinates = new ArrayList<>(listOfArrCoordinates.size());
             for (List<Double> arrCoordinates : listOfArrCoordinates) {
-                // coordinates.add(new CoordinateDTO(arrCoordinates.get(0), arrCoordinates.get(1)));
                 coordinates.add(new CoordinateDTO(arrCoordinates.get(1), arrCoordinates.get(0)));
             }
-            return coordinates;
+            return new TruckRoute(0, coordinates, Double.parseDouble(strDistance));
         }
         return null;
     }

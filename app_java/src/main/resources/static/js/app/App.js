@@ -46,6 +46,32 @@ class App {
         this._addEventToMap();
     }
 
+    async clearRoutes(clientId = 1, layerGroupId = 4) {
+        const layerCrud = new LayerCRUD(clientId,layerGroupId);
+        const responceAfterReadAll = layerCrud.readAll();
+        try {
+            if ((await responceAfterReadAll).ok) {
+                (await responceAfterReadAll).json().then(async json => {
+                    const arr = new Array();
+                    json.forEach(item => {
+                        if (item.typeObj == 'line') {
+                            arr.push(item.id);
+                        }
+                    });
+                    arr.forEach(async element => {
+                        const responceAfterDelete = layerCrud.delete(element);
+                        if ((await responceAfterDelete).ok) {
+                            console.log("deleted route");
+                        }
+                    });
+                });
+                return true;
+            } 
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     _addEventToMap() {
         let options = {
             geodesic: true,
@@ -195,6 +221,16 @@ class App {
             }).catch(async e => console.log(e));
     }
 
+    async generateGeoObject(clientId = 1, layerGroupId = 4) {
+        const rg = new RandomlyGenerateCRUD(clientId,layerGroupId);
+        rg.sendCommandToServer()
+            .then(async response => {
+                if ((await response).ok) {
+                    console.log("Геообъекты сгенерированы, сохранены в базу.")
+                } else console.log(response.status);
+            }).catch(async e => console.log(e));
+    }
+
     async getLayersFromTheServer(clientId = 1, layerGroupId = 4, layerManagerType = 'truckingIndustry') {
         const layerCrud = new LayerCRUD(clientId,layerGroupId);
         layerCrud.readAll()
@@ -266,7 +302,7 @@ class App {
             }).catch(e => console.log(e));
     }
 
-    async deletingLayersOnTheServer(clientId = 1, layerGroupId = 4) {
+    async clearLayersOnTheServer(clientId = 1, layerGroupId = 4) {
         const layerCrud = new LayerCRUD(clientId,layerGroupId);
         const responceAfterReadAll = layerCrud.readAll();
         try {

@@ -8,5 +8,7 @@ public interface TruckingIndustryService {
      * @param clientId - id клиента
      * @return возвращает в случае успеха 200.
      */
-    Boolean findRoutes(int layerGroupId, int clientId);
+    public Boolean findRoutes(int layerGroupId, int clientId);
+
+    public Boolean randomlyGenerate(int layerGroupId, int clientId);
 }

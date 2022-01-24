@@ -1,5 +1,6 @@
 package home.vs.app_java.service.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import home.vs.app_java.dao.GeoObjectDAO;
 import home.vs.app_java.dao.LayerDAO;
+import home.vs.app_java.dto.CoordinateDTO;
 import home.vs.app_java.dto.GeoObjectDTO;
 import home.vs.app_java.dto.LayerDTO;
 import home.vs.app_java.dto.trucking_industry.DeliveryPoint;
@@ -36,6 +38,8 @@ public class TruckingIndustryServiceImpl implements TruckingIndustryService {
     private GeoObjectDAO geoObjectDAO;
     @Autowired
     private RouteFindingAlgorithm routeFindingAlgorithm;
+
+    private RandomlyGenerateTruckingPosition randomlyGenerateTruckingPosition = new RandomlyGenerateTruckingPosition();
 
     @Override
     public Boolean findRoutes(int layerGroupId, int clientId) {
@@ -63,7 +67,7 @@ public class TruckingIndustryServiceImpl implements TruckingIndustryService {
                                 truckName = truck.getName();
                             }
                         }
-                        layer.setName("truck " + truckName);
+                        layer.setName("truck route " + truckName);
                         layer.setDescription("route");
                         layer.setTypeObj("line");
                         String strJsonMapOptionsGeoObject = "\"options\":{\"opacity\":0.5,\"geodesic\":true,\"strokeWidth\": 5},\"properties\":{}";
@@ -72,7 +76,7 @@ public class TruckingIndustryServiceImpl implements TruckingIndustryService {
                         UUID layerId = layerDAO.save(layer, layerGroupId, clientId);
                         GeoObjectDTO geoObject = new GeoObjectDTO();
                         geoObject.setCoordinates(route.getCoordinates());
-                        geoObject.setDescription("route");
+                        geoObject.setDescription(String.valueOf(route.getLength()));
                         geoObject.setName(truckName);
                         geoObject.setType("line");
                         geoObject.setStrJson("{" + strJsonMapOptionsGeoObject + "," + strJsonTruckingIndustryOptionsGeoObject + "}");
@@ -80,12 +84,74 @@ public class TruckingIndustryServiceImpl implements TruckingIndustryService {
                     }
                     return true;
                 }
+            }            
+        }
+        return false;
+    }
 
-            }
-            
+    @Override
+    public Boolean randomlyGenerate(int layerGroupId, int clientId) {
+        final ListsOfTruckingIndustryEntities lists = this.randomlyGenerateTruckingPosition.generate(new CoordinateDTO(52.03848435832438,113.50342766583945), 30);
+        final List<Truck> listOfTrucks = lists.getListOfTrucks();
+        final List<Goods> listOfGoods = lists.getListOfGoods();
+        final List<DeliveryPoint> listOfDeliveryPoints = lists.getListOfDeliveryPoints();
+        //truck
+        final LayerDTO truckLayer = new LayerDTO();
+        truckLayer.setName("грузоперевозчики");
+        truckLayer.setDescription("trucks");
+        truckLayer.setTypeObj("point");
+        String strJsonMapOptionsTruck = "\"options\":{\"preset\":\"islands#blueAutoIcon\"},\"properties\":{}";
+        truckLayer.setStrJson("{\"trucking_industry\":{\"type\":\"truck\"}}");
+        final UUID truckLayerId = this.layerDAO.save(truckLayer, layerGroupId, clientId);
+        for (Truck truck : listOfTrucks) {
+            final String strJsonTruckingIndustryOptionsGeoObject = "\"trucking_industry\":{\"type\":\"truck\",\"carrying\":"+truck.getCarrying()+"}";
+            final GeoObjectDTO geoObject = new GeoObjectDTO();
+            geoObject.setCoordinates(Arrays.asList(truck.getCoordinate()));
+            geoObject.setDescription("truck");
+            geoObject.setName(truck.getName());
+            geoObject.setType("point");
+            geoObject.setStrJson("{" + strJsonMapOptionsTruck + "," + strJsonTruckingIndustryOptionsGeoObject + "}");
+            this.geoObjectDAO.save(geoObject, truckLayerId, layerGroupId, clientId);
+        }
+        //goods
+        final LayerDTO goodsLayer = new LayerDTO();
+        goodsLayer.setName("товары");
+        goodsLayer.setDescription("goods");
+        goodsLayer.setTypeObj("point");
+        final String strJsonMapOptionsGoods = "\"options\":{\"preset\":\"islands#darkOrangePocketCircleIcon\"},\"properties\":{}";
+        goodsLayer.setStrJson("{\"trucking_industry\":{\"type\":\"goods\"}}");
+        final UUID goodsLayerId = this.layerDAO.save(goodsLayer, layerGroupId, clientId);
+        for (Goods goods : listOfGoods) {
+            final String strJsonTruckingIndustryOptionsGeoObject = "\"trucking_industry\":{\"type\":\"goods\",\"weight\":"+goods.getWeight()+",\"deliveryPoint\":"+goods.getDeliveryPointId()+"}";
+            final GeoObjectDTO geoObject = new GeoObjectDTO();
+            geoObject.setCoordinates(Arrays.asList(goods.getCoordinate()));
+            geoObject.setDescription("goods");
+            geoObject.setName(goods.getName());
+            geoObject.setType("point");
+            geoObject.setStrJson("{" + strJsonMapOptionsGoods + "," + strJsonTruckingIndustryOptionsGeoObject + "}");
+            this.geoObjectDAO.save(geoObject, goodsLayerId, layerGroupId, clientId);
+        }
+        //delivery point
+        final LayerDTO deliveryPointLayer = new LayerDTO();
+        deliveryPointLayer.setName("пункты доставки");
+        deliveryPointLayer.setDescription("deliveryPoint");
+        deliveryPointLayer.setTypeObj("point");
+        final String strJsonMapOptionsDeliveryPoint = "\"options\":{\"preset\":\"islands#nightCircleDotIcon\"},\"properties\":{}";
+        deliveryPointLayer.setStrJson("{\"trucking_industry\":{\"type\":\"deliveryPoint\"}}");
+        final UUID deliveryPointLayerId = this.layerDAO.save(deliveryPointLayer, layerGroupId, clientId);
+        for (DeliveryPoint deliveryPoint : listOfDeliveryPoints) {
+            final String strJsonTruckingIndustryOptionsGeoObject = "\"trucking_industry\":{\"type\":\"deliveryPoint\"}";
+            final GeoObjectDTO geoObject = new GeoObjectDTO();
+            geoObject.setCoordinates(Arrays.asList(deliveryPoint.getCoordinate()));
+            geoObject.setDescription("deliveryPoint");
+            geoObject.setName(deliveryPoint.getName());
+            geoObject.setType("point");
+            geoObject.setStrJson("{" + strJsonMapOptionsDeliveryPoint + "," + strJsonTruckingIndustryOptionsGeoObject + "}");
+            this.geoObjectDAO.save(geoObject, deliveryPointLayerId, layerGroupId, clientId);
         }
 
-        return false;
+        return true;
+
     }
     
     private ListsOfTruckingIndustryEntities separationByEntities (List<LayerDTO> pointLayers, Map<LayerDTO, List<GeoObjectDTO>> mapOfListOfGeoObjects) {

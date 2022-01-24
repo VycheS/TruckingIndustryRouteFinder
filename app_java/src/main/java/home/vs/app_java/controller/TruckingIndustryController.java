@@ -1,7 +1,5 @@
 package home.vs.app_java.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +19,20 @@ public class TruckingIndustryController {
         this.truckingIndustryService = truckingIndustryService;
     }
     
-    @GetMapping(value = REQUEST)
+    @GetMapping(value = REQUEST+"/find")
     public ResponseEntity<HttpStatus> findRoutes(@PathVariable(name = "layer_group_id") int layerGroupId
         , @PathVariable(name = "client_id") int clientId) {
 
         return this.truckingIndustryService.findRoutes(layerGroupId, clientId)
+            ? new ResponseEntity<>(HttpStatus.OK)
+            : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        
+    }
+    @GetMapping(value = REQUEST+"/generate")
+    public ResponseEntity<HttpStatus> randomlyGenerate(@PathVariable(name = "layer_group_id") int layerGroupId
+        , @PathVariable(name = "client_id") int clientId) {
+
+        return this.truckingIndustryService.randomlyGenerate(layerGroupId, clientId)
             ? new ResponseEntity<>(HttpStatus.OK)
             : new ResponseEntity<>(HttpStatus.NOT_FOUND);
         
